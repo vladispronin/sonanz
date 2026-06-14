@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Link\Infrastructure\Adapter\AudioSource\Youtube;
@@ -7,6 +8,10 @@ use App\Link\Domain\Enum\TitleTypeEnum;
 use App\Link\Domain\Port\AudioSourceProviderInterface;
 use App\Link\Domain\ValueObject\AudioSourceLink;
 use App\Link\Domain\ValueObject\LinkSearchQuery;
+use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\PlaylistResult\ApiPlaylistResultDTO;
+use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\SearchResult\ApiSearchResultDTO;
+use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum\SearchObjectIdTypeEnum;
+use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum\SearchObjectTypeEnum;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Throwable;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
@@ -18,6 +23,10 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
     private const string SEARCH_ENDPOINT = '/youtube/v3/search';
     private const string PLAYLIST_ITEMS_ENDPOINT = '/youtube/v3/playlistItems';
     private const string VIDEO_LINK_PREFIX = 'https://www.youtube.com/watch?v=';
+    private const string SEARCH_PART_VALUE = 'snippet';
+    private const string PLAYLIST_PART_VALUE = 'contentDetails';
+    private const int SEARCH_MAX_RESULTS = 1;
+    private const int PLAYLIST_TRACKS_MAX_RESULTS = 50;
     private HttpClientInterface $httpClient;
 
     private function __construct(HttpClientInterface $httpClient)
@@ -30,17 +39,14 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
      */
     public function search(LinkSearchQuery $query): array
     {
-        $searchObjectType = match ($query->titleType) {
-            TitleTypeEnum::Track => 'video',
-            TitleTypeEnum::Album => 'playlist',
-        };
+        $searchObjectType = SearchObjectTypeEnum::fromTitleType($query->titleType);
 
         $searchData = $this->get(
             self::YOUTUBE_GOOGLEAPIS_DOMAIN . self::SEARCH_ENDPOINT,
             [
-                'part' => 'snippet',
+                'part' => self::SEARCH_PART_VALUE,
                 'type' => $searchObjectType,
-                'maxResults' => 1,
+                'maxResults' => self::SEARCH_MAX_RESULTS,
                 'q' => $query->author . ' - ' . $query->title,
                 'key' => env('YOUTUBE_API_KEY'),
             ]
@@ -50,12 +56,11 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
             return [];
         }
 
-        $idType = match ($query->titleType) {
-            TitleTypeEnum::Track => 'videoId',
-            TitleTypeEnum::Album => 'playlistId',
-        };
+        $searchObjectIdType = SearchObjectIdTypeEnum::fromTitleType($query->titleType);
 
-        $mediaId = $searchData['items'][0]['id'][$idType];
+        $searchResultDTO = ApiSearchResultDTO::fromArray($searchData);
+
+        $mediaId = $searchResultDTO->getMediaId($searchObjectIdType);
 
         if ($query->titleType === TitleTypeEnum::Track) {
             return [
@@ -66,9 +71,9 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
         $playlistData = $this->get(
             self::WWW_GOOGLEAPIS_DOMAIN . self::PLAYLIST_ITEMS_ENDPOINT,
             [
-                'part' => 'contentDetails',
+                'part' => self::PLAYLIST_PART_VALUE,
                 'playlistId' => $mediaId,
-                'maxResults' => 50,
+                'maxResults' => self::PLAYLIST_TRACKS_MAX_RESULTS,
                 'key' => env('YOUTUBE_API_KEY'),
             ]
         );
@@ -79,8 +84,14 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
 
         $linksList = [];
 
-        foreach ($playlistData['items'] as $playlistItem) {
-            $linksList[] = new AudioSourceLink($playlistItem['contentDetails']['videoId']);
+        $playlistResultDTO = ApiPlaylistResultDTO::fromArray($playlistData);
+
+        $playlistItems = $playlistResultDTO->getPlaylistItems();
+
+        foreach ($playlistItems as $playlistItem) {
+            $linksList[] = new AudioSourceLink(
+                $playlistItem->getVideoId()
+            );
         }
 
         return $linksList;
