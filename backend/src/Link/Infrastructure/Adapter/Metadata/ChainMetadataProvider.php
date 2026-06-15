@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Link\Infrastructure\Adapter\AudioSource;
+namespace App\Link\Infrastructure\Adapter\Metadata;
 
-use App\Link\Domain\Port\AudioSourceProviderInterface;
+use App\Link\Domain\Port\MetadataProviderInterface;
 use App\Link\Domain\ValueObject\AudioSearchQuery;
-use App\Link\Domain\ValueObject\AudioSourceLink;
 
-final readonly class ChainAudioSourceProvider implements AudioSourceProviderInterface
+final readonly class ChainMetadataProvider implements MetadataProviderInterface
 {
-    /** @param iterable<AudioSourceProviderInterface> $providers */
+    /** @param iterable<MetadataProviderInterface> $providers */
     public function __construct(private iterable $providers) {}
 
     /**
-     * @return AudioSourceLink[]
+     * @return
      */
     public function search(AudioSearchQuery $query): array
     {
@@ -28,4 +27,3 @@ final readonly class ChainAudioSourceProvider implements AudioSourceProviderInte
         return [];
     }
 }
-

@@ -7,7 +7,7 @@ namespace App\Link\Infrastructure\Adapter\AudioSource\Youtube;
 use App\Link\Domain\Enum\TitleTypeEnum;
 use App\Link\Domain\Port\AudioSourceProviderInterface;
 use App\Link\Domain\ValueObject\AudioSourceLink;
-use App\Link\Domain\ValueObject\LinkSearchQuery;
+use App\Link\Domain\ValueObject\AudioSearchQuery;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\PlaylistResult\ApiPlaylistResultDTO;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\SearchResult\ApiSearchResultDTO;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum\SearchObjectIdTypeEnum;
@@ -24,7 +24,7 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
     private const string PLAYLIST_ITEMS_ENDPOINT = '/youtube/v3/playlistItems';
     private const string VIDEO_LINK_PREFIX = 'https://www.youtube.com/watch?v=';
     private const string SEARCH_PART_VALUE = 'snippet';
-    private const string PLAYLIST_PART_VALUE = 'contentDetails';
+    private const string PLAYLIST_PART_VALUE = 'contentDetails,snippet';
     private const int SEARCH_MAX_RESULTS = 1;
     private const int PLAYLIST_TRACKS_MAX_RESULTS = 50;
     private HttpClientInterface $httpClient;
@@ -37,7 +37,7 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
     /**
      * @return AudioSourceLink[]
      */
-    public function search(LinkSearchQuery $query): array
+    public function search(AudioSearchQuery $query): array
     {
         $searchObjectType = SearchObjectTypeEnum::fromTitleType($query->titleType);
 
@@ -64,7 +64,10 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
 
         if ($query->titleType === TitleTypeEnum::Track) {
             return [
-                new AudioSourceLink(self::VIDEO_LINK_PREFIX . $mediaId)
+                new AudioSourceLink(
+                    self::VIDEO_LINK_PREFIX . $mediaId,
+                    $searchResultDTO->getTitle()
+                )
             ];
         }
 
@@ -90,7 +93,8 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
 
         foreach ($playlistItems as $playlistItem) {
             $linksList[] = new AudioSourceLink(
-                $playlistItem->getVideoId()
+                self::VIDEO_LINK_PREFIX . $playlistItem->getVideoId(),
+                $playlistItem->getTitle(),
             );
         }
 

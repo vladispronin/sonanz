@@ -6,7 +6,7 @@ namespace App\Link\Domain\ValueObject;
 
 use App\Link\Domain\Enum\TitleTypeEnum;
 
-final readonly class LinkSearchQuery
+final readonly class AudioSearchQuery
 {
     private function __construct(
         public string $author,
@@ -14,7 +14,7 @@ final readonly class LinkSearchQuery
         public TitleTypeEnum $titleType,
     ) {}
 
-    public static function fromRawInput(string $author, string $title, TitleTypeEnum $titleType): LinkSearchQuery
+    public static function fromRawInput(string $author, string $title, TitleTypeEnum $titleType): AudioSearchQuery
     {
         $author = self::normalizeString($author);
         $title = self::normalizeString($title);

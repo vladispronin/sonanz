@@ -8,5 +8,6 @@ final readonly class AudioSourceLink
 {
     public function __construct(
         private string $url,
+        private string $title,
     ) {}
 }

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\SearchResult;
+namespace App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\PlaylistResult;
 
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\ThumbnailSetDTO;
 
-final readonly class SnippetDTO
+final readonly class PlaylistItemSnippetDTO
 {
     private function __construct(
         public string $publishedAt,
@@ -15,8 +15,11 @@ final readonly class SnippetDTO
         public string $description,
         public ThumbnailSetDTO $thumbnails,
         public string $channelTitle,
-        public string $liveBroadcastContent,
-        public string $publishTime,
+        public string $playlistId,
+        public int $position,
+        public PlaylistItemResourceIdDTO $resourceId,
+        public string $videoOwnerChannelTitle,
+        public string $videoOwnerChannelId,
     ) {}
 
     public static function fromArray(array $data): self
@@ -28,8 +31,11 @@ final readonly class SnippetDTO
             description: $data['description'],
             thumbnails: ThumbnailSetDTO::fromArray($data['thumbnails']),
             channelTitle: $data['channelTitle'],
-            liveBroadcastContent: $data['liveBroadcastContent'],
-            publishTime: $data['publishTime'],
+            playlistId: $data['playlistId'],
+            position: $data['position'],
+            resourceId: PlaylistItemResourceIdDTO::fromArray($data['resourceId']),
+            videoOwnerChannelTitle: $data['videoOwnerChannelTitle'],
+            videoOwnerChannelId: $data['videoOwnerChannelId'],
         );
     }
 }

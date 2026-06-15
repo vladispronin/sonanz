@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\SearchResult;
+namespace App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO;
 
 final readonly class ThumbnailDTO
 {

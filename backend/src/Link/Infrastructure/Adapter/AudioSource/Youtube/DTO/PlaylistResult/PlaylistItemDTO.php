@@ -10,6 +10,7 @@ final readonly class PlaylistItemDTO
         public string $kind,
         public string $etag,
         public string $id,
+        public PlaylistItemSnippetDTO $snippet,
         public PlaylistItemContentDetailsDTO $contentDetails,
     ) {}
 
@@ -19,6 +20,7 @@ final readonly class PlaylistItemDTO
             kind: $data['kind'],
             etag: $data['etag'],
             id: $data['id'],
+            snippet: PlaylistItemSnippetDTO::fromArray($data['snippet']),
             contentDetails: PlaylistItemContentDetailsDTO::fromArray($data['contentDetails']),
         );
     }
@@ -26,5 +28,10 @@ final readonly class PlaylistItemDTO
     public function getVideoId(): string
     {
         return $this->contentDetails->videoId;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->snippet->title;
     }
 }

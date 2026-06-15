@@ -45,4 +45,9 @@ final readonly class ApiSearchResultDTO
             SearchObjectIdTypeEnum::PlaylistId => $id->playlistId,
         } ?? throw new \LogicException('Unexpected null id for given search object type');
     }
+
+    public function getTitle(): string
+    {
+        return $this->items[0]->snippet->title;
+    }
 }
