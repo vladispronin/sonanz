@@ -4,40 +4,45 @@ declare(strict_types=1);
 
 namespace App\Link\Application\MessageHandler;
 
+use App\Catalog\Application\Message\CreateAlbumCommand;
+use App\Catalog\Application\Message\CreateTrackCommand;
 use App\Link\Application\Message\LinkSearchMessage;
+use App\Link\Domain\Enum\TitleTypeEnum;
 use App\Link\Domain\Port\AudioSourceProviderInterface;
 use App\Link\Domain\ValueObject\AudioSourceLink;
 use App\Link\Domain\ValueObject\AudioSearchQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsMessageHandler]
 class LinkSearchMessageHandler
 {
-    private AudioSourceProviderInterface $audioSourceProvider;
-
-    public function __construct(AudioSourceProviderInterface $audioSourceProvider)
-    {
-        $this->audioSourceProvider = $audioSourceProvider;
-    }
+    public function __construct(
+        private AudioSourceProviderInterface $audioSourceProvider,
+        private MessageBusInterface $bus,
+    ) {}
 
     public function __invoke(LinkSearchMessage $message): void
     {
         $audioSearchQuery = AudioSearchQuery::fromRawInput(
             $message->author,
             $message->title,
-            $message->titleType
+            $message->titleType,
         );
 
         $audioSourceLinks = $this->audioSourceProvider->search($audioSearchQuery);
 
-        //TODO send links to queue
-    }
+        if (!$audioSourceLinks) {
+            return;
+        }
 
-    /**
-     * @type AudioSourceLink[] $link
-     */
-    private function isAlbum(array $link): bool
-    {
-        return count($link) > 1;
+        if ($message->titleType === TitleTypeEnum::Track) {
+            $this->bus->dispatch(new CreateTrackCommand($message->jobId, $audioSourceLinks[0]->url));
+        }
+
+        if ($message->titleType === TitleTypeEnum::Album) {
+            $urls = array_map(fn(AudioSourceLink $link) => $link->url, $audioSourceLinks);
+            $this->bus->dispatch(new CreateAlbumCommand($message->jobId, $urls));
+        }
     }
 }

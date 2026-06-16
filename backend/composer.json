@@ -7,6 +7,9 @@
         "php": ">=8.4",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "doctrine/doctrine-bundle": "^3.2",
+        "doctrine/doctrine-migrations-bundle": "^4.0",
+        "doctrine/orm": "^3.6",
         "symfony/console": "7.3.*",
         "symfony/dotenv": "7.3.*",
         "symfony/flex": "^2",
@@ -14,6 +17,7 @@
         "symfony/http-client": "7.3.*",
         "symfony/messenger": "7.3.*",
         "symfony/runtime": "7.3.*",
+        "symfony/uid": "7.3.*",
         "symfony/yaml": "7.3.*"
     },
     "config": {

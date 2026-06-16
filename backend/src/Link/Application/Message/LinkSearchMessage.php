@@ -8,8 +8,10 @@ use App\Link\Domain\Enum\TitleTypeEnum;
 
 final readonly class LinkSearchMessage
 {
-    public string $jobId;
-    public string $author;
-    public string $title;
-    public TitleTypeEnum $titleType;
+    public function __construct(
+        public string $jobId,
+        public string $author,
+        public string $title,
+        public TitleTypeEnum $titleType,
+    ) {}
 }

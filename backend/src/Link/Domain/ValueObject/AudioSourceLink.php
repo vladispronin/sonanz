@@ -7,7 +7,7 @@ namespace App\Link\Domain\ValueObject;
 final readonly class AudioSourceLink
 {
     public function __construct(
-        private string $url,
-        private string $title,
+        public string $url,
+        public string $title,
     ) {}
 }
