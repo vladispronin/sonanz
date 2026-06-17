@@ -2,15 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Link\Application\Message;
+namespace App\Api\Infrastructure\Request;
 
 use App\Link\Domain\Enum\TitleTypeEnum;
-use Symfony\Component\Uid\Uuid;
 
-final readonly class LinkSearchMessage
+final readonly class CreateJobRequest
 {
     public function __construct(
-        public Uuid $jobId,
         public string $author,
         public string $title,
         public TitleTypeEnum $titleType,
