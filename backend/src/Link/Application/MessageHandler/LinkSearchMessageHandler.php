@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Link\Application\MessageHandler;
 
-use App\Catalog\Application\Message\CreateAlbumCommand;
-use App\Catalog\Application\Message\CreateTrackCommand;
+use App\Link\Application\Event\JobFailedEvent;
+use App\Link\Application\Event\LinksFoundEvent;
 use App\Link\Application\Message\LinkSearchMessage;
-use App\Link\Domain\Enum\TitleTypeEnum;
 use App\Link\Domain\Port\AudioSourceProviderInterface;
 use App\Link\Domain\ValueObject\AudioSourceLink;
 use App\Link\Domain\ValueObject\AudioSearchQuery;
@@ -33,16 +32,12 @@ class LinkSearchMessageHandler
         $audioSourceLinks = $this->audioSourceProvider->search($audioSearchQuery);
 
         if (!$audioSourceLinks) {
+            $this->bus->dispatch(new JobFailedEvent($message->jobId, JobFailedEvent::LINKS_NOT_FOUND));
             return;
         }
 
-        if ($message->titleType === TitleTypeEnum::Track) {
-            $this->bus->dispatch(new CreateTrackCommand($message->jobId, $audioSourceLinks[0]->url));
-        }
+        $urls = array_map(fn(AudioSourceLink $link) => $link->url, $audioSourceLinks);
 
-        if ($message->titleType === TitleTypeEnum::Album) {
-            $urls = array_map(fn(AudioSourceLink $link) => $link->url, $audioSourceLinks);
-            $this->bus->dispatch(new CreateAlbumCommand($message->jobId, $urls));
-        }
+        $this->bus->dispatch(new LinksFoundEvent($message->jobId, $message->titleType, $urls));
     }
 }
