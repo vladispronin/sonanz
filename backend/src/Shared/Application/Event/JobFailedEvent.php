@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Link\Application\Event;
+namespace App\Shared\Application\Event;
 
 use Symfony\Component\Uid\Uuid;
 

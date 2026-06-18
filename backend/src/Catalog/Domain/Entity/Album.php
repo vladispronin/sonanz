@@ -25,9 +25,9 @@ class Album
     private DateTimeImmutable $updatedAt;
 
     #[ORM\Column(length: 255)]
-    private string $jobId;
+    private Uuid $jobId;
 
-    public function __construct(string $jobId)
+    public function __construct(Uuid $jobId)
     {
         $this->id = Uuid::v7();
         $this->createdAt = new DateTimeImmutable();

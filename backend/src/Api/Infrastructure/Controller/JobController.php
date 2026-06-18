@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Api\Infrastructure\Controller;
 
-use App\Api\Application\Message\CreateJobMessage;
+use App\Shared\Application\Message\CreateJobMessage;
 use App\Api\Infrastructure\Request\CreateJobRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;

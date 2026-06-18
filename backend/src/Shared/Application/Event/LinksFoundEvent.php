@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Link\Application\Message;
+namespace App\Shared\Application\Event;
 
-use App\Link\Domain\Enum\TitleTypeEnum;
+use App\Shared\Domain\Enum\TitleTypeEnum;
 use Symfony\Component\Uid\Uuid;
 
-final readonly class LinkSearchMessage
+final readonly class LinksFoundEvent
 {
+    /** @param string[] $urls */
     public function __construct(
         public Uuid $jobId,
-        public string $author,
-        public string $title,
         public TitleTypeEnum $titleType,
+        public array $urls,
     ) {}
 }

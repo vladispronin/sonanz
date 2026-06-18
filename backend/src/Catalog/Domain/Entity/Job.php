@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Catalog\Domain\Entity;
 
 use App\Catalog\Domain\Enum\JobStatusEnum;
-use App\Link\Domain\Enum\TitleTypeEnum;
+use App\Shared\Domain\Enum\TitleTypeEnum;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;

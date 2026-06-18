@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Api\Application\Message;
+namespace App\Shared\Application\Message;
 
-use App\Link\Domain\Enum\TitleTypeEnum;
+use App\Shared\Domain\Enum\TitleTypeEnum;
 use Symfony\Component\Uid\Uuid;
 
-class CreateJobMessage
+final readonly class CreateJobMessage
 {
     public function __construct(
         public Uuid $id,

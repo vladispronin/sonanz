@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Link\Infrastructure\Adapter\AudioSource\Youtube;
 
-use App\Link\Domain\Enum\TitleTypeEnum;
+use App\Shared\Domain\Enum\TitleTypeEnum;
 use App\Link\Domain\Port\AudioSourceProviderInterface;
 use App\Link\Domain\ValueObject\AudioSourceLink;
 use App\Link\Domain\ValueObject\AudioSearchQuery;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum;
 
-use App\Link\Domain\Enum\TitleTypeEnum;
+use App\Shared\Domain\Enum\TitleTypeEnum;
 
 enum SearchObjectTypeEnum: string
 {

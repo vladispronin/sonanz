@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Catalog\Application\EventHandler;
 
-use App\Link\Application\Event\JobFailedEvent;
+use App\Shared\Application\Event\JobFailedEvent;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]

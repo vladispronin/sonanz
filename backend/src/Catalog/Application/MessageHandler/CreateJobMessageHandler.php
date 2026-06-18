@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Catalog\Application\MessageHandler;
 
-use App\Api\Application\Message\CreateJobMessage;
 use App\Catalog\Domain\Port\JobRepositoryInterface;
-use App\Link\Application\Message\LinkSearchMessage;
+use App\Shared\Application\Message\CreateJobMessage;
+use App\Shared\Application\Message\LinkSearchMessage;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Link\Domain\Enum;
+namespace App\Shared\Domain\Enum;
 
 enum TitleTypeEnum: string
 {

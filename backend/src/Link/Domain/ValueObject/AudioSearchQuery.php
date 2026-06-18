@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Link\Domain\ValueObject;
 
-use App\Link\Domain\Enum\TitleTypeEnum;
+use App\Shared\Domain\Enum\TitleTypeEnum;
 
 final readonly class AudioSearchQuery
 {

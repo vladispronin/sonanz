@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Catalog\Domain\Port;
 
 use App\Catalog\Domain\Entity\Job;
-use App\Link\Domain\Enum\TitleTypeEnum;
+use App\Shared\Domain\Enum\TitleTypeEnum;
 use Symfony\Component\Uid\Uuid;
 
 interface JobRepositoryInterface

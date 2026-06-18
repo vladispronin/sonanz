@@ -8,6 +8,7 @@ use App\Catalog\Domain\Entity\Album;
 use App\Catalog\Domain\Port\AlbumRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 class DoctrineAlbumRepository extends ServiceEntityRepository implements AlbumRepositoryInterface
 {
@@ -16,7 +17,7 @@ class DoctrineAlbumRepository extends ServiceEntityRepository implements AlbumRe
         parent::__construct($registry, Album::class);
     }
 
-    public function create(string $jobId): Album
+    public function create(Uuid $jobId): Album
     {
         $album = new Album(jobId: $jobId);
 

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Link\Application\MessageHandler;
 
-use App\Link\Application\Event\JobFailedEvent;
-use App\Link\Application\Event\LinksFoundEvent;
-use App\Link\Application\Message\LinkSearchMessage;
+use App\Shared\Application\Event\JobFailedEvent;
+use App\Shared\Application\Event\LinksFoundEvent;
+use App\Shared\Application\Message\LinkSearchMessage;
 use App\Link\Domain\Port\AudioSourceProviderInterface;
 use App\Link\Domain\ValueObject\AudioSourceLink;
 use App\Link\Domain\ValueObject\AudioSearchQuery;

@@ -9,8 +9,8 @@ use App\Catalog\Domain\Port\AlbumRepositoryInterface;
 use App\Catalog\Domain\Port\JobRepositoryInterface;
 use App\Catalog\Domain\Port\TrackRepositoryInterface;
 use App\Catalog\Domain\ValueObject\JobProgress;
-use App\Link\Application\Event\LinksFoundEvent;
-use App\Link\Domain\Enum\TitleTypeEnum;
+use App\Shared\Application\Event\LinksFoundEvent;
+use App\Shared\Domain\Enum\TitleTypeEnum;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 

@@ -6,7 +6,7 @@ namespace App\Catalog\Infrastructure\Repository;
 
 use App\Catalog\Domain\Entity\Job;
 use App\Catalog\Domain\Port\JobRepositoryInterface;
-use App\Link\Domain\Enum\TitleTypeEnum;
+use App\Shared\Domain\Enum\TitleTypeEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
