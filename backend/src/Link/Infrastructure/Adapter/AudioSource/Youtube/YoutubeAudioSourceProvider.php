@@ -14,7 +14,6 @@ use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum\SearchObjectIdTypeE
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum\SearchObjectTypeEnum;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Throwable;
-use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
 
 class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
 {
@@ -27,12 +26,12 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
     private const string PLAYLIST_PART_VALUE = 'contentDetails,snippet';
     private const int SEARCH_MAX_RESULTS = 1;
     private const int PLAYLIST_TRACKS_MAX_RESULTS = 50;
-    private HttpClientInterface $httpClient;
 
-    private function __construct(HttpClientInterface $httpClient)
-    {
-        $this->httpClient = $httpClient;
-    }
+    public function __construct(
+        private HttpClientInterface $httpClient,
+        private string $youtubeApiKey,
+    ) {}
+
 
     /**
      * @return AudioSourceLink[]
@@ -44,11 +43,13 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
         $searchData = $this->get(
             self::YOUTUBE_GOOGLEAPIS_DOMAIN . self::SEARCH_ENDPOINT,
             [
-                'part' => self::SEARCH_PART_VALUE,
-                'type' => $searchObjectType,
-                'maxResults' => self::SEARCH_MAX_RESULTS,
-                'q' => $query->author . ' - ' . $query->title,
-                'key' => env('YOUTUBE_API_KEY'),
+                'query' => [
+                    'part' => self::SEARCH_PART_VALUE,
+                    'type' => $searchObjectType,
+                    'maxResults' => self::SEARCH_MAX_RESULTS,
+                    'q' => $query->author . ' - ' . $query->title,
+                    'key' => $this->youtubeApiKey,
+                ]
             ]
         );
 
@@ -74,10 +75,12 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
         $playlistData = $this->get(
             self::WWW_GOOGLEAPIS_DOMAIN . self::PLAYLIST_ITEMS_ENDPOINT,
             [
-                'part' => self::PLAYLIST_PART_VALUE,
-                'playlistId' => $mediaId,
-                'maxResults' => self::PLAYLIST_TRACKS_MAX_RESULTS,
-                'key' => env('YOUTUBE_API_KEY'),
+                'query' => [
+                    'part' => self::PLAYLIST_PART_VALUE,
+                    'playlistId' => $mediaId,
+                    'maxResults' => self::PLAYLIST_TRACKS_MAX_RESULTS,
+                    'key' => $this->youtubeApiKey,
+                ]
             ]
         );
 

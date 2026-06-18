@@ -34,15 +34,13 @@ class CreateJobMessageHandler
             $message->id,
         );
 
-        $job = $this->jobRepository->find($message->id);
-
-        $this->jobRepository->start($job->getId());
+        $this->jobRepository->start($message->id);
 
         $this->messageBus->dispatch(new LinkSearchMessage(
-            $job->getId(),
-            $job->getAuthor(),
-            $job->getTitle(),
-            $job->getTitleType(),
+            $message->id,
+            $message->author,
+            $message->title,
+            $message->titleType,
         ));
     }
 }

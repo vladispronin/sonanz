@@ -11,12 +11,14 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
+#[ORM\Entity]
+#[ORM\Table(name: 'jobs')]
 class Job
 {
     #[ORM\Id]
     #[ORM\Column(type: UuidType::NAME, unique: true)]
     #[ORM\GeneratedValue(strategy: 'NONE')]
-    private Uuid $id {
+    public Uuid $id {
         get {
             return $this->id;
         }
@@ -35,21 +37,21 @@ class Job
     private int $progress = 0;
 
     #[ORM\Column(length: 255)]
-    private string $author {
+    public string $author {
         get {
             return $this->author;
         }
     }
 
     #[ORM\Column(length: 255)]
-    private string $title {
+    public string $title {
         get {
             return $this->title;
         }
     }
 
     #[ORM\Column(length: 255)]
-    private TitleTypeEnum $titleType {
+    public TitleTypeEnum $titleType {
         get {
             return $this->titleType;
         }

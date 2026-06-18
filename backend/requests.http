@@ -1,0 +1,11 @@
+### Создать job (track)
+POST http://localhost:8000/api/v1/job
+Content-Type: application/json
+
+{"author": "Pink Floyd", "title": "Wish You Were Here", "titleType": "track"}
+
+### Создать job (album)
+POST http://localhost:8000/api/v1/job
+Content-Type: application/json
+
+{"author": "Pink Floyd", "title": "The Wall", "titleType": "album"}

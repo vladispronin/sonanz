@@ -25,7 +25,7 @@ class Track
     private DateTimeImmutable $updatedAt;
 
     #[ORM\Column(length: 255)]
-    private string $jobId;
+    private Uuid $jobId;
 
     #[ORM\Column(length: 255)]
     private string $url;
@@ -36,7 +36,7 @@ class Track
     #[ORM\Column]
     private bool $isDownloaded = false;
 
-    public function __construct(string $jobId, string $url, ?Album $album = null)
+    public function __construct(Uuid $jobId, string $url, ?Album $album = null)
     {
         $this->id = Uuid::v7();
         $this->createdAt = new DateTimeImmutable();

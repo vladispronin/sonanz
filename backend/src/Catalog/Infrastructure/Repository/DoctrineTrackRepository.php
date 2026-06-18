@@ -9,6 +9,7 @@ use App\Catalog\Domain\Entity\Track;
 use App\Catalog\Domain\Port\TrackRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Uid\Uuid;
 
 class DoctrineTrackRepository extends ServiceEntityRepository implements TrackRepositoryInterface
 {
@@ -17,7 +18,7 @@ class DoctrineTrackRepository extends ServiceEntityRepository implements TrackRe
         parent::__construct($registry, Track::class);
     }
 
-    public function create(string $jobId, string $url, ?Album $album): Track
+    public function create(Uuid $jobId, string $url, ?Album $album): Track
     {
         $track = new Track(
             jobId: $jobId,
