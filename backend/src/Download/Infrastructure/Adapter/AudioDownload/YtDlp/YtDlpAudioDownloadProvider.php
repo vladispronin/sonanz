@@ -14,9 +14,25 @@ class YtDlpAudioDownloadProvider implements AudioDownloadProviderInterface
         private string $ytDlpBin = 'yt-dlp',
         private string $proxy = '',
         private string $denoBin = '',
+        private string $cookiesFile = '',
     ) {}
 
     public function download(AudioDownloadQuery $query): void
+    {
+        $process = $this->buildProcess($query, withCookies: false);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            $process = $this->buildProcess($query, withCookies: true);
+            $process->run();
+        }
+
+        if (!$process->isSuccessful()) {
+            throw new \RuntimeException('yt-dlp failed: ' . $process->getErrorOutput());
+        }
+    }
+
+    private function buildProcess(AudioDownloadQuery $query, bool $withCookies): Process
     {
         $cmd = [$this->ytDlpBin];
 
@@ -30,6 +46,11 @@ class YtDlpAudioDownloadProvider implements AudioDownloadProviderInterface
             $cmd[] = 'deno:' . $this->denoBin;
         }
 
+        if ($withCookies && $this->cookiesFile !== '') {
+            $cmd[] = '--cookies';
+            $cmd[] = $this->cookiesFile;
+        }
+
         $process = new Process(array_merge($cmd, [
             '--remote-components', 'ejs:github',
             '-f', 'bestaudio',
@@ -39,10 +60,7 @@ class YtDlpAudioDownloadProvider implements AudioDownloadProviderInterface
             $query->url,
         ]));
         $process->setTimeout(300);
-        $process->run();
 
-        if (!$process->isSuccessful()) {
-            throw new \RuntimeException('yt-dlp failed: ' . $process->getErrorOutput());
-        }
+        return $process;
     }
 }

@@ -35,6 +35,7 @@ services:
             $ytDlpBin: '%env(YT_DLP_BIN)%'
             $proxy: '%env(default::YT_DLP_PROXY)%'
             $denoBin: '%env(default::YT_DLP_DENO_BIN)%'
+            $cookiesFile: '%env(default::YT_DLP_COOKIES_FILE)%'
 
     App\Download\Domain\Port\AudioDownloadProviderInterface: '@App\Download\Infrastructure\Adapter\AudioDownload\YtDlp\YtDlpAudioDownloadProvider'
 

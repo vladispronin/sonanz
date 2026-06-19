@@ -34,7 +34,7 @@ class LinksFoundEventHandler
             $track = $this->trackRepository->create(
                 jobId: $event->jobId,
                 url: $event->audioSourceLinks[0]->url,
-                title: $event->audioSourceLinks[0]->title,
+                title: $event->title,
                 album: null
             );
 
@@ -50,7 +50,7 @@ class LinksFoundEventHandler
             $tracks = [];
 
             $this->entityManager->wrapInTransaction(function () use ($event, &$album, &$tracks): void {
-                $album = $this->albumRepository->create($event->jobId);
+                $album = $this->albumRepository->create($event->jobId, $event->title);
 
                 foreach ($event->audioSourceLinks as $link) {
                     $tracks[] = $this->trackRepository->create(

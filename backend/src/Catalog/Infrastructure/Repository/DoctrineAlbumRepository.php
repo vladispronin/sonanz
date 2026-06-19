@@ -17,13 +17,18 @@ class DoctrineAlbumRepository extends ServiceEntityRepository implements AlbumRe
         parent::__construct($registry, Album::class);
     }
 
-    public function create(Uuid $jobId): Album
+    public function create(Uuid $jobId, string $title): Album
     {
-        $album = new Album(jobId: $jobId);
+        $album = new Album(jobId: $jobId, title: $title);
 
         $this->getEntityManager()->persist($album);
         $this->getEntityManager()->flush();
 
         return $album;
+    }
+
+    public function getTitleById(Uuid $albumId): string
+    {
+        return $this->find($albumId)->getTitle();
     }
 }

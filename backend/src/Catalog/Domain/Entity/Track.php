@@ -40,9 +40,6 @@ class Track
     #[ORM\Column(length: 255)]
     private string $title;
 
-    #[ORM\Column]
-    private bool $isDownloaded = false;
-
     public function __construct(
         Uuid $jobId,
         string $url,

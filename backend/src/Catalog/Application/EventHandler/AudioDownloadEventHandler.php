@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Catalog\Application\EventHandler;
 
+use App\Catalog\Domain\Port\AlbumRepositoryInterface;
 use App\Catalog\Domain\Port\JobRepositoryInterface;
 use App\Catalog\Domain\Port\TrackRepositoryInterface;
 use App\Shared\Application\Event\AudioDownloadedEvent;
@@ -19,17 +20,20 @@ class AudioDownloadEventHandler
 {
     private TrackRepositoryInterface $trackRepository;
     private JobRepositoryInterface $jobRepository;
+    private AlbumRepositoryInterface $albumRepository;
     private EntityManagerInterface $entityManager;
     private MessageBusInterface $messageBus;
 
     public function __construct(
         TrackRepositoryInterface $trackRepository,
         JobRepositoryInterface $jobRepository,
+        AlbumRepositoryInterface $albumRepository,
         EntityManagerInterface $entityManager,
         MessageBusInterface $messageBus
     ) {
         $this->trackRepository = $trackRepository;
         $this->jobRepository = $jobRepository;
+        $this->albumRepository = $albumRepository;
         $this->entityManager = $entityManager;
         $this->messageBus = $messageBus;
     }
@@ -47,7 +51,8 @@ class AudioDownloadEventHandler
             } else {
                 if ($this->trackRepository->allTracksCompleted($event->albumId)) {
                     $tracks = $this->trackRepository->getAlbumTracksData($event->albumId);
-                    $this->messageBus->dispatch(new ArchiveAlbumMessage($event->albumId, $tracks));
+                    $albumTitle = $this->albumRepository->getTitleById($event->albumId);
+                    $this->messageBus->dispatch(new ArchiveAlbumMessage($albumTitle, $tracks));
                 }
             }
         }

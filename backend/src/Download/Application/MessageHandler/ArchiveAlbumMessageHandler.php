@@ -14,16 +14,16 @@ class ArchiveAlbumMessageHandler
 {
     public function __invoke(ArchiveAlbumMessage $message): void
     {
-        $this->archive($message->albumId, $message->tracks);
+        $this->archive($message->albumTitle, $message->tracks);
     }
 
     /**
      * @param TrackArchiveEntry[] $tracks
      */
-    private function archive(Uuid $albumId, array $tracks): void
+    private function archive(string $albumTitle, array $tracks): void
     {
         $zip = new \ZipArchive();
-        $archivePath = '/tmp/' . $albumId->toString() . '.zip';
+        $archivePath = '/tmp/' . $albumTitle . '.zip';
 
         $zip->open($archivePath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 

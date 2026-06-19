@@ -27,16 +27,25 @@ class Album
     #[ORM\Column(length: 255)]
     private Uuid $jobId;
 
-    public function __construct(Uuid $jobId)
+    #[ORM\Column(length: 255)]
+    private string $title;
+
+    public function __construct(Uuid $jobId, string $title)
     {
         $this->id = Uuid::v7();
         $this->createdAt = new DateTimeImmutable();
         $this->updatedAt = new DateTimeImmutable();
         $this->jobId = $jobId;
+        $this->title = $title;
     }
 
     public function getId(): Uuid
     {
         return $this->id;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title;
     }
 }

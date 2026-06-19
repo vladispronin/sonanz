@@ -13,6 +13,7 @@ final readonly class LinksFoundEvent
     /** @param AudioSourceLink[] $audioSourceLinks */
     public function __construct(
         public Uuid $jobId,
+        public string $title,
         public TitleTypeEnum $titleType,
         public array $audioSourceLinks,
     ) {}
