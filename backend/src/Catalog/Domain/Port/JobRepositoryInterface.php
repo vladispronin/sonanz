@@ -15,6 +15,7 @@ interface JobRepositoryInterface
         string $title,
         TitleTypeEnum $titleType,
         ?Uuid $id = null,
+        bool $withMetadata = false,
     ): void;
 
     public function getJobObject(Uuid $jobId): Job;

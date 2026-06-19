@@ -6,6 +6,7 @@ namespace App\Catalog\Infrastructure\Repository;
 
 use App\Catalog\Domain\Entity\Job;
 use App\Catalog\Domain\Port\JobRepositoryInterface;
+use App\Catalog\Domain\ValueObject\JobProgress;
 use App\Shared\Domain\Enum\TitleTypeEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -22,14 +23,16 @@ class DoctrineJobRepository extends ServiceEntityRepository implements JobReposi
         string $author,
         string $title,
         TitleTypeEnum $titleType,
-        ?Uuid $id = null
+        ?Uuid $id = null,
+        bool $withMetadata = false,
     ): void
     {
         $job = new Job(
             $author,
             $title,
             $titleType,
-            $id
+            $id,
+            $withMetadata,
         );
 
         $this->getEntityManager()->persist($job);
@@ -46,28 +49,31 @@ class DoctrineJobRepository extends ServiceEntityRepository implements JobReposi
     public function start(Uuid $jobId): void
     {
         $job = $this->find($jobId);
-        $job->start();
+        $job->markAsProcessing();
         $this->getEntityManager()->flush();
     }
 
     public function complete(Uuid $jobId): void
     {
-        $job = $this->find($jobId);
-        $job->complete();
-        $this->getEntityManager()->flush();
+        $this->getEntityManager()->wrapInTransaction(function () use ($jobId): void {
+            $job = $this->find($jobId);
+            $job->markAsCompleted();
+            $job->updateProgress(JobProgress::JOB_COMPLETED);
+            $this->getEntityManager()->flush();
+        });
     }
 
     public function cancel(Uuid $jobId): void
     {
         $job = $this->find($jobId);
-        $job->cancel();
+        $job->markAsCancelled();
         $this->getEntityManager()->flush();
     }
 
     public function fail(Uuid $jobId): void
     {
         $job = $this->find($jobId);
-        $job->fail();
+        $job->markAsFailed();
         $this->getEntityManager()->flush();
     }
 

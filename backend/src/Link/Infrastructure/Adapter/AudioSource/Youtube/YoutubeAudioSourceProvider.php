@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Link\Infrastructure\Adapter\AudioSource\Youtube;
 
-use App\Shared\Domain\Enum\TitleTypeEnum;
 use App\Link\Domain\Port\AudioSourceProviderInterface;
-use App\Link\Domain\ValueObject\AudioSourceLink;
 use App\Link\Domain\ValueObject\AudioSearchQuery;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\PlaylistResult\ApiPlaylistResultDTO;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\SearchResult\ApiSearchResultDTO;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum\SearchObjectIdTypeEnum;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum\SearchObjectTypeEnum;
+use App\Shared\Domain\Enum\TitleTypeEnum;
+use App\Shared\Domain\ValueObject\AudioSourceLink;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Throwable;
 

@@ -29,3 +29,17 @@ services:
             $providers:
                 - '@App\Link\Infrastructure\Adapter\AudioSource\Youtube\YoutubeAudioSourceProvider'
                 # - '@App\Link\Infrastructure\Adapter\AudioSource\YtDlp\YtDlpAudioSourceProvider'
+
+    App\Download\Infrastructure\Adapter\AudioDownload\YtDlp\YtDlpAudioDownloadProvider:
+        arguments:
+            $ytDlpBin: '%env(YT_DLP_BIN)%'
+            $proxy: '%env(default::YT_DLP_PROXY)%'
+            $denoBin: '%env(default::YT_DLP_DENO_BIN)%'
+
+    App\Download\Domain\Port\AudioDownloadProviderInterface: '@App\Download\Infrastructure\Adapter\AudioDownload\YtDlp\YtDlpAudioDownloadProvider'
+
+    App\Download\Infrastructure\Adapter\AudioDownload\ChainAudioDownloadProvider:
+        arguments:
+            $providers:
+                - '@App\Download\Infrastructure\Adapter\AudioDownload\YtDlp\YtDlpAudioDownloadProvider'
+                # - '@App\Download\Infrastructure\Adapter\AudioDownload\Cobalt\CobaltAudioDownloadProvider'

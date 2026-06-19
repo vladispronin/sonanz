@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Catalog\Domain\Entity;
 
 use App\Catalog\Domain\Enum\JobStatusEnum;
+use App\Catalog\Domain\ValueObject\JobProgress;
 use App\Shared\Domain\Enum\TitleTypeEnum;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -34,34 +35,26 @@ class Job
     private JobStatusEnum $status;
 
     #[ORM\Column]
-    private int $progress = 0;
+    private int $progress = JobProgress::JOB_INITIATED;
 
     #[ORM\Column(length: 255)]
-    public string $author {
-        get {
-            return $this->author;
-        }
-    }
+    public string $author;
 
     #[ORM\Column(length: 255)]
-    public string $title {
-        get {
-            return $this->title;
-        }
-    }
+    public string $title ;
 
     #[ORM\Column(length: 255)]
-    public TitleTypeEnum $titleType {
-        get {
-            return $this->titleType;
-        }
-    }
+    public TitleTypeEnum $titleType;
+
+    #[ORM\Column(options: ['default' => false])]
+    public bool $withMetadata = false;
 
     public function __construct(
         string $author,
         string $title,
         TitleTypeEnum $titleType,
-        ?Uuid $id = null
+        ?Uuid $id = null,
+        bool $withMetadata = false,
     )
     {
         $this->id = $id ?? Uuid::v7();
@@ -69,28 +62,29 @@ class Job
         $this->author = $author;
         $this->title = $title;
         $this->titleType = $titleType;
+        $this->withMetadata = $withMetadata;
 
         $this->status = JobStatusEnum::Pending;
         $this->createdAt = new DateTimeImmutable();
         $this->updatedAt = new DateTimeImmutable();
     }
 
-    public function start(): void
+    public function markAsProcessing(): void
     {
         $this->status = JobStatusEnum::Processing;
     }
 
-    public function complete(): void
+    public function markAsCompleted(): void
     {
         $this->status = JobStatusEnum::Completed;
     }
 
-    public function cancel(): void
+    public function markAsCancelled(): void
     {
         $this->status = JobStatusEnum::Cancelled;
     }
 
-    public function fail(): void
+    public function markAsFailed(): void
     {
         $this->status = JobStatusEnum::Failed;
     }

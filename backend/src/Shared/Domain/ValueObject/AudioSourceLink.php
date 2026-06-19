@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Link\Domain\ValueObject;
+namespace App\Shared\Domain\ValueObject;
 
 final readonly class AudioSourceLink
 {

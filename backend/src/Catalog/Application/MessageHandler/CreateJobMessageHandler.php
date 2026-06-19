@@ -32,6 +32,7 @@ class CreateJobMessageHandler
             $message->title,
             $message->titleType,
             $message->id,
+            $message->withMetadata,
         );
 
         $this->jobRepository->start($message->id);

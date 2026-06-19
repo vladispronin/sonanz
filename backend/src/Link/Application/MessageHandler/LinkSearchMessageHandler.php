@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Link\Application\MessageHandler;
 
+use App\Link\Domain\Port\AudioSourceProviderInterface;
+use App\Link\Domain\ValueObject\AudioSearchQuery;
 use App\Shared\Application\Event\JobFailedEvent;
 use App\Shared\Application\Event\LinksFoundEvent;
 use App\Shared\Application\Message\LinkSearchMessage;
-use App\Link\Domain\Port\AudioSourceProviderInterface;
-use App\Link\Domain\ValueObject\AudioSourceLink;
-use App\Link\Domain\ValueObject\AudioSearchQuery;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -36,8 +35,8 @@ class LinkSearchMessageHandler
             return;
         }
 
-        $urls = array_map(fn(AudioSourceLink $link) => $link->url, $audioSourceLinks);
+        # $urls = array_map(fn(AudioSourceLink $link) => $link->url, $audioSourceLinks);
 
-        $this->bus->dispatch(new LinksFoundEvent($message->jobId, $message->titleType, $urls));
+        $this->bus->dispatch(new LinksFoundEvent($message->jobId, $message->titleType, $audioSourceLinks));
     }
 }

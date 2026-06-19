@@ -34,7 +34,8 @@ class JobController
             $jobId,
             $request->author,
             $request->title,
-            $request->titleType
+            $request->titleType,
+            $request->withMetadata,
         ));
 
         return new JsonResponse(

@@ -6,7 +6,7 @@ namespace App\Link\Infrastructure\Adapter\AudioSource;
 
 use App\Link\Domain\Port\AudioSourceProviderInterface;
 use App\Link\Domain\ValueObject\AudioSearchQuery;
-use App\Link\Domain\ValueObject\AudioSourceLink;
+use App\Shared\Domain\ValueObject\AudioSourceLink;
 
 final readonly class ChainAudioSourceProvider implements AudioSourceProviderInterface
 {

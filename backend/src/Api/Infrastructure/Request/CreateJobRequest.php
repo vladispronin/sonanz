@@ -12,5 +12,6 @@ final readonly class CreateJobRequest
         public string $author,
         public string $title,
         public TitleTypeEnum $titleType,
+        public bool $withMetadata,
     ) {}
 }

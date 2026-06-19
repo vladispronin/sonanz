@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Catalog\Application\EventHandler;
 
-use App\Catalog\Application\Event\TrackCreatedEvent;
 use App\Catalog\Domain\Port\AlbumRepositoryInterface;
 use App\Catalog\Domain\Port\JobRepositoryInterface;
 use App\Catalog\Domain\Port\TrackRepositoryInterface;
 use App\Catalog\Domain\ValueObject\JobProgress;
 use App\Shared\Application\Event\LinksFoundEvent;
+use App\Shared\Application\Event\TrackCreatedEvent;
 use App\Shared\Domain\Enum\TitleTypeEnum;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 
@@ -22,6 +23,7 @@ class LinksFoundEventHandler
         private AlbumRepositoryInterface $albumRepository,
         private JobRepositoryInterface $jobRepository,
         private MessageBusInterface $bus,
+        private EntityManagerInterface $entityManager,
     ) {}
 
     public function __invoke(LinksFoundEvent $event): void
@@ -29,26 +31,43 @@ class LinksFoundEventHandler
         $this->jobRepository->updateProgress($event->jobId, JobProgress::LINKS_FOUND);
 
         if ($event->titleType === TitleTypeEnum::Track) {
-            $track = $this->trackRepository->create($event->jobId, $event->urls[0], null);
+            $track = $this->trackRepository->create(
+                jobId: $event->jobId,
+                url: $event->audioSourceLinks[0]->url,
+                title: $event->audioSourceLinks[0]->title,
+                album: null
+            );
 
             $this->bus->dispatch(new TrackCreatedEvent(
-                trackId: $track->getId()->toString(),
+                trackId: $track->getId(),
                 jobId: $event->jobId,
-                url: $event->urls[0],
+                url: $event->audioSourceLinks[0]->url,
             ));
         }
 
         if ($event->titleType === TitleTypeEnum::Album) {
-            $album = $this->albumRepository->create($event->jobId);
+            $album = null;
+            $tracks = [];
 
-            foreach ($event->urls as $url) {
-                $track = $this->trackRepository->create($event->jobId, $url, $album);
+            $this->entityManager->wrapInTransaction(function () use ($event, &$album, &$tracks): void {
+                $album = $this->albumRepository->create($event->jobId);
 
+                foreach ($event->audioSourceLinks as $link) {
+                    $tracks[] = $this->trackRepository->create(
+                        jobId: $event->jobId,
+                        url: $link->url,
+                        title: $link->title,
+                        album: $album
+                    );
+                }
+            });
+
+            foreach ($tracks as $track) {
                 $this->bus->dispatch(new TrackCreatedEvent(
-                    trackId: $track->getId()->toString(),
+                    trackId: $track->getId(),
                     jobId: $event->jobId,
-                    url: $url,
-                    albumId: $album->getId()->toString(),
+                    url: $track->getUrl(),
+                    albumId: $album->getId(),
                 ));
             }
         }

@@ -7,9 +7,9 @@ namespace App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO;
 final readonly class ThumbnailSetDTO
 {
     private function __construct(
-        public ThumbnailDTO $default,
-        public ThumbnailDTO $medium,
-        public ThumbnailDTO $high,
+        public ?ThumbnailDTO $default,
+        public ?ThumbnailDTO $medium,
+        public ?ThumbnailDTO $high,
         public ?ThumbnailDTO $standard,
         public ?ThumbnailDTO $maxres,
     ) {}
@@ -17,9 +17,9 @@ final readonly class ThumbnailSetDTO
     public static function fromArray(array $data): self
     {
         return new self(
-            default: ThumbnailDTO::fromArray($data['default']),
-            medium: ThumbnailDTO::fromArray($data['medium']),
-            high: ThumbnailDTO::fromArray($data['high']),
+            default: isset($data['default']) ? ThumbnailDTO::fromArray($data['default']) : null,
+            medium: isset($data['medium']) ? ThumbnailDTO::fromArray($data['medium']) : null,
+            high: isset($data['high']) ? ThumbnailDTO::fromArray($data['high']) : null,
             standard: isset($data['standard']) ? ThumbnailDTO::fromArray($data['standard']) : null,
             maxres: isset($data['maxres']) ? ThumbnailDTO::fromArray($data['maxres']) : null,
         );

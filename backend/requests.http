@@ -2,10 +2,16 @@
 POST http://localhost:8000/api/v1/job
 Content-Type: application/json
 
-{"author": "Pink Floyd", "title": "Wish You Were Here", "titleType": "track"}
+{"author": "Pink Floyd", "title": "Wish You Were Here", "titleType": "track", "withMetadata": false}
 
-### Создать job (album)
+### Создать job (short album)
 POST http://localhost:8000/api/v1/job
 Content-Type: application/json
 
-{"author": "Pink Floyd", "title": "The Wall", "titleType": "album"}
+{"author": "Tame Impala", "title": "Patience", "titleType": "album", "withMetadata": false}
+
+### Создать job (full album)
+POST http://localhost:8000/api/v1/job
+Content-Type: application/json
+
+{"author": "lost horizon", "title": "awakening the world", "titleType": "album", "withMetadata": false}

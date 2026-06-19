@@ -6,9 +6,27 @@ namespace App\Catalog\Domain\Port;
 
 use App\Catalog\Domain\Entity\Album;
 use App\Catalog\Domain\Entity\Track;
+use App\Shared\Domain\ValueObject\TrackArchiveEntry;
 use Symfony\Component\Uid\Uuid;
 
 interface TrackRepositoryInterface
 {
-    public function create(Uuid $jobId, string $url, ?Album $album): Track;
+    public function create(Uuid $jobId, string $url, string $title, ?Album $album): Track;
+
+    public function getTrackObject(Uuid $trackId): Track;
+
+    public function markAsDownloaded(Uuid $trackId): void;
+
+    public function markAsTagged(Uuid $trackId): void;
+
+    public function markAsCompleted(Uuid $trackId): void;
+
+    public function markAsFailed(Uuid $trackId): void;
+
+    /**
+     * @return TrackArchiveEntry[]
+     */
+    public function getAlbumTracksData(Uuid $albumId): array;
+
+    public function allTracksCompleted(Uuid $albumId): bool;
 }
