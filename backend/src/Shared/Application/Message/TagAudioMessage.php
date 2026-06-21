@@ -9,6 +9,8 @@ use Symfony\Component\Uid\Uuid;
 final readonly class TagAudioMessage
 {
     public function __construct(
-        public Uuid $trackId
+        public Uuid $trackId,
+        public string $authorTitle,
+        public string $trackTitle,
     ) {}
 }

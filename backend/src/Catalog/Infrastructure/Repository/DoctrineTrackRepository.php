@@ -35,7 +35,7 @@ class DoctrineTrackRepository extends ServiceEntityRepository implements TrackRe
         return $track;
     }
 
-    public function getTrackObject(Uuid $trackId): Track
+    public function findById(Uuid $trackId): Track
     {
         return $this->find($trackId);
     }

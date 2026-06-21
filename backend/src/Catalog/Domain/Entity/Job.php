@@ -38,10 +38,10 @@ class Job
     private int $progress = JobProgress::JOB_INITIATED;
 
     #[ORM\Column(length: 255)]
-    public string $author;
+    private string $author;
 
     #[ORM\Column(length: 255)]
-    public string $title ;
+    public string $title;
 
     #[ORM\Column(length: 255)]
     public TitleTypeEnum $titleType;
@@ -67,6 +67,11 @@ class Job
         $this->status = JobStatusEnum::Pending;
         $this->createdAt = new DateTimeImmutable();
         $this->updatedAt = new DateTimeImmutable();
+    }
+
+    public function getAuthor(): string
+    {
+        return $this->author;
     }
 
     public function markAsProcessing(): void

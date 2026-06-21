@@ -18,7 +18,7 @@ interface JobRepositoryInterface
         bool $withMetadata = false,
     ): void;
 
-    public function getJobObject(Uuid $jobId): Job;
+    public function findById(Uuid $jobId): Job;
 
     public function updateProgress(Uuid $jobId, int $progress): void;
 

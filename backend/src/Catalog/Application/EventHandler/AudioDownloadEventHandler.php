@@ -42,17 +42,20 @@ class AudioDownloadEventHandler
         $this->trackRepository->markAsDownloaded($event->trackId);
 
         if ($this->isMetadataNeeded($event->jobId)) {
-            $this->messageBus->dispatch(new TagAudioMessage($event->trackId));
+            $authorTitle = $this->jobRepository->findById($event->jobId)->getAuthor();
+            $trackTitle = $this->trackRepository->findById($event->trackId)->getTitle();
+            $this->messageBus->dispatch(new TagAudioMessage($event->trackId, $authorTitle, $trackTitle));
         } else {
             $this->trackRepository->markAsCompleted($event->trackId);
 
-            if (!$event->albumId) {
+            if (is_null($event->albumId)) {
                 $this->jobRepository->complete($event->jobId);
             } else {
                 if ($this->trackRepository->allTracksCompleted($event->albumId)) {
-                    $tracks = $this->trackRepository->getAlbumTracksData($event->albumId);
+                    $artist = $this->jobRepository->findById($event->jobId)->getAuthor();
                     $albumTitle = $this->albumRepository->getTitleById($event->albumId);
-                    $this->messageBus->dispatch(new ArchiveAlbumMessage($albumTitle, $tracks));
+                    $tracks = $this->trackRepository->getAlbumTracksData($event->albumId);
+                    $this->messageBus->dispatch(new ArchiveAlbumMessage($artist, $albumTitle, $tracks));
                 }
             }
         }
@@ -60,6 +63,6 @@ class AudioDownloadEventHandler
 
     private function isMetadataNeeded(Uuid $jobId): bool
     {
-        return $this->jobRepository->getJobObject($jobId)->withMetadata;
+        return $this->jobRepository->findById($jobId)->withMetadata;
     }
 }

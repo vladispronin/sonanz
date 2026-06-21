@@ -44,3 +44,17 @@ services:
             $providers:
                 - '@App\Download\Infrastructure\Adapter\AudioDownload\YtDlp\YtDlpAudioDownloadProvider'
                 # - '@App\Download\Infrastructure\Adapter\AudioDownload\Cobalt\CobaltAudioDownloadProvider'
+
+    App\Tag\Infrastructure\Adapter\AcoustId\AcoustIdID3TagsProvider:
+        arguments:
+            $apiKey: '%env(ACOUSTID_API_KEY)%'
+
+    App\Tag\Infrastructure\Adapter\ChainID3TagsProvider:
+        arguments:
+            $providers:
+                - '@App\Tag\Infrastructure\Adapter\AcoustId\AcoustIdID3TagsProvider'
+                - '@App\Tag\Infrastructure\Adapter\MusicBrainz\MusicBrainzID3TagsProvider'
+
+    App\Tag\Domain\Port\ID3TagsProviderInterface: '@App\Tag\Infrastructure\Adapter\ChainID3TagsProvider'
+    App\Tag\Domain\Port\FingerprintProviderInterface: '@App\Tag\Infrastructure\Adapter\Chromaprint\ChromaprintFingerprintProvider'
+    App\Tag\Domain\Port\CoverArtProviderInterface: '@App\Tag\Infrastructure\Adapter\CoverArtArchive\CoverArtArchiveProvider'

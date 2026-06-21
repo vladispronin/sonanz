@@ -34,7 +34,7 @@ class LinksFoundEventHandler
             $track = $this->trackRepository->create(
                 jobId: $event->jobId,
                 url: $event->audioSourceLinks[0]->url,
-                title: $event->title,
+                title: $event->audioSourceLinks[0]->title,
                 album: null
             );
 

@@ -35,8 +35,6 @@ class LinkSearchMessageHandler
             return;
         }
 
-        # $urls = array_map(fn(AudioSourceLink $link) => $link->url, $audioSourceLinks);
-
         $this->bus->dispatch(new LinksFoundEvent(
             $message->jobId,
             $message->title,

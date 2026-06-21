@@ -26,11 +26,21 @@ final readonly class AudioSearchQuery
 
     private static function normalizeString(string $value): string
     {
-        return $value;
+        $value = trim($value);
+        $value = preg_replace('/\s+/', ' ', $value);
+        return mb_convert_case($value, MB_CASE_TITLE, 'UTF-8');
     }
 
     private static function validate(string $author, string $title): void
     {
-
+        foreach (['author' => $author, 'title' => $title] as $field => $value) {
+            $length = mb_strlen($value);
+            if (!$length) {
+                throw new \InvalidArgumentException("Field $field shouldn't be empty.");
+            }
+            if ($length > 200) {
+                throw new \InvalidArgumentException("Field $field is too long.");
+            }
+        }
     }
 }

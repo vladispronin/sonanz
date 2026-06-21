@@ -47,7 +47,7 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
                     'part' => self::SEARCH_PART_VALUE,
                     'type' => $searchObjectType,
                     'maxResults' => self::SEARCH_MAX_RESULTS,
-                    'q' => $query->author . ' - ' . $query->title,
+                    'q' => $this->buildSearchString($query),
                     'key' => $this->youtubeApiKey,
                 ]
             ]
@@ -102,6 +102,15 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
         }
 
         return $linksList;
+    }
+
+    private function buildSearchString(AudioSearchQuery $query): string
+    {
+        if ($query->titleType === TitleTypeEnum::Album) {
+            return $query->author . ' ' . $query->title . ' Full Album';
+        }
+
+        return $query->author . ' - ' . $query->title;
     }
 
     private function get(string $url, array $options): ?array

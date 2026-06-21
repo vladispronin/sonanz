@@ -62,9 +62,19 @@ class Track
         return $this->id;
     }
 
+    public function getJobId(): Uuid
+    {
+        return $this->jobId;
+    }
+
     public function getUrl(): string
     {
         return $this->url;
+    }
+
+    public function getAlbum(): ?Album
+    {
+        return $this->album;
     }
 
     public function getTitle(): string

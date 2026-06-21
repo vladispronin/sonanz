@@ -13,7 +13,7 @@ interface TrackRepositoryInterface
 {
     public function create(Uuid $jobId, string $url, string $title, ?Album $album): Track;
 
-    public function getTrackObject(Uuid $trackId): Track;
+    public function findById(Uuid $trackId): Track;
 
     public function markAsDownloaded(Uuid $trackId): void;
 

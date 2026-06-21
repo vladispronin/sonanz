@@ -23,10 +23,13 @@ final readonly class ApiPlaylistResultDTO
         return new self(
             kind: $data['kind'],
             etag: $data['etag'],
-            items: array_map(
+            items: array_values(array_map(
                 static fn (array $item): PlaylistItemDTO => PlaylistItemDTO::fromArray($item),
-                $data['items'],
-            ),
+                array_filter(
+                    $data['items'],
+                    static fn (array $item): bool => !empty($item['snippet']['videoOwnerChannelId']),
+                ),
+            )),
             pageInfo: PageInfoDTO::fromArray($data['pageInfo']),
         );
     }

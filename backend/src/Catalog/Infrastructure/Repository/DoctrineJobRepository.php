@@ -77,7 +77,7 @@ class DoctrineJobRepository extends ServiceEntityRepository implements JobReposi
         $this->getEntityManager()->flush();
     }
 
-    public function getJobObject(Uuid $jobId): Job
+    public function findById(Uuid $jobId): Job
     {
         return $this->find($jobId);
     }
