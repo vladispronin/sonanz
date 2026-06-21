@@ -8,8 +8,9 @@ use App\Link\Domain\Port\AudioSourceProviderInterface;
 use App\Link\Domain\ValueObject\AudioSearchQuery;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\PlaylistResult\ApiPlaylistResultDTO;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\SearchResult\ApiSearchResultDTO;
-use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum\SearchObjectIdTypeEnum;
+use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\SearchResult\SearchResultItemDTO;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum\SearchObjectTypeEnum;
+use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Service\TitleRelevanceScorer;
 use App\Shared\Domain\Enum\TitleTypeEnum;
 use App\Shared\Domain\ValueObject\AudioSourceLink;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -24,14 +25,15 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
     private const string VIDEO_LINK_PREFIX = 'https://www.youtube.com/watch?v=';
     private const string SEARCH_PART_VALUE = 'snippet';
     private const string PLAYLIST_PART_VALUE = 'contentDetails,snippet';
-    private const int SEARCH_MAX_RESULTS = 1;
+    private const int SEARCH_MAX_RESULTS = 5;
     private const int PLAYLIST_TRACKS_MAX_RESULTS = 50;
+    private const float RELEVANCE_THRESHOLD = 0.3;
 
     public function __construct(
         private HttpClientInterface $httpClient,
         private string $youtubeApiKey,
+        private TitleRelevanceScorer $relevanceScorer,
     ) {}
-
 
     /**
      * @return AudioSourceLink[]
@@ -57,17 +59,20 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
             return [];
         }
 
-        $searchObjectIdType = SearchObjectIdTypeEnum::fromTitleType($query->titleType);
-
         $searchResultDTO = ApiSearchResultDTO::fromArray($searchData);
 
-        $mediaId = $searchResultDTO->getMediaId($searchObjectIdType);
+        $normalizedQuery = $query->author . ' ' . $query->title;
+        $bestItem = $this->pickBestItem($searchResultDTO->items, $normalizedQuery);
+
+        if ($bestItem === null) {
+            return [];
+        }
 
         if ($query->titleType === TitleTypeEnum::Track) {
             return [
                 new AudioSourceLink(
-                    self::VIDEO_LINK_PREFIX . $mediaId,
-                    $searchResultDTO->getTitle()
+                    self::VIDEO_LINK_PREFIX . $bestItem->id->videoId,
+                    $bestItem->snippet->title,
                 )
             ];
         }
@@ -77,7 +82,7 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
             [
                 'query' => [
                     'part' => self::PLAYLIST_PART_VALUE,
-                    'playlistId' => $mediaId,
+                    'playlistId' => $bestItem->id->playlistId,
                     'maxResults' => self::PLAYLIST_TRACKS_MAX_RESULTS,
                     'key' => $this->youtubeApiKey,
                 ]
@@ -92,9 +97,7 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
 
         $playlistResultDTO = ApiPlaylistResultDTO::fromArray($playlistData);
 
-        $playlistItems = $playlistResultDTO->getPlaylistItems();
-
-        foreach ($playlistItems as $playlistItem) {
+        foreach ($playlistResultDTO->getPlaylistItems() as $playlistItem) {
             $linksList[] = new AudioSourceLink(
                 self::VIDEO_LINK_PREFIX . $playlistItem->getVideoId(),
                 $playlistItem->getTitle(),
@@ -102,6 +105,29 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
         }
 
         return $linksList;
+    }
+
+    /**
+     * @param SearchResultItemDTO[] $items
+     */
+    private function pickBestItem(array $items, string $query): ?SearchResultItemDTO
+    {
+        $bestScore = 0.0;
+        $bestItem = null;
+
+        foreach ($items as $item) {
+            $score = $this->relevanceScorer->score($query, $item->snippet->title);
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $bestItem = $item;
+            }
+        }
+
+        if ($bestScore < self::RELEVANCE_THRESHOLD) {
+            return null;
+        }
+
+        return $bestItem;
     }
 
     private function buildSearchString(AudioSearchQuery $query): string

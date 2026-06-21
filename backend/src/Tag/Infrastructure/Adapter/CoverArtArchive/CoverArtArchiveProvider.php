@@ -13,6 +13,7 @@ class CoverArtArchiveProvider implements CoverArtProviderInterface
 
     public function __construct(
         private HttpClientInterface $httpClient,
+        private ?string $proxy = null,
     ) {}
 
     public function getByReleaseGroupId(?string $releaseGroupId): ?string
@@ -24,9 +25,10 @@ class CoverArtArchiveProvider implements CoverArtProviderInterface
         $response = $this->httpClient->request(
             'GET',
             self::API_URL . $releaseGroupId . '/front',
+            $this->proxy ? ['proxy' => $this->proxy] : [],
         );
 
-        if ($response->getStatusCode() === 404) {
+        if (in_array($response->getStatusCode(), [404, 500])) {
             return null;
         }
 

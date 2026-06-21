@@ -31,4 +31,11 @@ class DoctrineAlbumRepository extends ServiceEntityRepository implements AlbumRe
     {
         return $this->find($albumId)->getTitle();
     }
+
+    public function updateTitle(Uuid $albumId, string $title): void
+    {
+        $album = $this->find($albumId);
+        $album->updateTitle($title);
+        $this->getEntityManager()->flush();
+    }
 }

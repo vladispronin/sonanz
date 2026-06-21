@@ -12,4 +12,6 @@ interface AlbumRepositoryInterface
     public function create(Uuid $jobId, string $title): Album;
 
     public function getTitleById(Uuid $albumId): string;
+
+    public function updateTitle(Uuid $albumId, string $title): void;
 }

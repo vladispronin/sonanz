@@ -48,4 +48,9 @@ class Album
     {
         return $this->title;
     }
+
+    public function updateTitle(string $title): void
+    {
+        $this->title = $title;
+    }
 }

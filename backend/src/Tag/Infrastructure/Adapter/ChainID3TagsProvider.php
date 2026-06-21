@@ -17,7 +17,7 @@ final readonly class ChainID3TagsProvider implements ID3TagsProviderInterface
     {
         foreach ($this->providers as $provider) {
             $result = $provider->getTags($query);
-            if ($result !== null) {
+            if ($result !== null && !$result->isEmpty()) {
                 return $result;
             }
         }

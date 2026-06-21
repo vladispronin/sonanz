@@ -101,4 +101,9 @@ class Track
     {
         $this->status = TrackStatusEnum::Failed;
     }
+
+    public function updateTitle(string $title): void
+    {
+        $this->title = $title;
+    }
 }

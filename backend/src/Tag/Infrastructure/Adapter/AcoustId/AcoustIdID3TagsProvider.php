@@ -13,7 +13,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class AcoustIdID3TagsProvider implements ID3TagsProviderInterface
 {
     private const API_URL = 'https://api.acoustid.org/v2/lookup';
-    private const META = 'recordings+releasegroups+releases+usermeta+tracks';
+    private const META = 'recordings releasegroups releases usermeta tracks';
 
     public function __construct(
         private HttpClientInterface $httpClient,

@@ -84,6 +84,13 @@ class DoctrineTrackRepository extends ServiceEntityRepository implements TrackRe
         );
     }
 
+    public function updateTitle(Uuid $trackId, string $title): void
+    {
+        $track = $this->find($trackId);
+        $track->updateTitle($title);
+        $this->getEntityManager()->flush();
+    }
+
     public function allTracksCompleted(Uuid $albumId): bool
     {
         $count = $this->createQueryBuilder('t')

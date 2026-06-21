@@ -29,7 +29,7 @@ final readonly class AcoustIdMetadataDTO
 
         return new self(
             title: $recording['title'] ?? null,
-            artist: $recording['artists'][0] ?? null,
+            artist: $recording['artists'][0]['name'] ?? null,
             album: $releaseGroup['title'] ?? null,
             trackNumber: isset($track['position']) ? (int) $track['position'] : null,
             releaseGroupId: $releaseGroup['id'] ?? null,

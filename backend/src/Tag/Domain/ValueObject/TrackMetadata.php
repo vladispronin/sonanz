@@ -13,4 +13,11 @@ final readonly class TrackMetadata
         public ?int $trackNumber,
         public ?string $releaseGroupId,
     ) {}
+
+    public function isEmpty(): bool
+    {
+        return $this->title === null
+            && $this->artist === null
+            && $this->releaseGroupId === null;
+    }
 }

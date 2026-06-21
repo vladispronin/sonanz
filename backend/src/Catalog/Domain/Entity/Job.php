@@ -49,6 +49,9 @@ class Job
     #[ORM\Column(options: ['default' => false])]
     public bool $withMetadata = false;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $metadataAuthor = null;
+
     public function __construct(
         string $author,
         string $title,
@@ -72,6 +75,16 @@ class Job
     public function getAuthor(): string
     {
         return $this->author;
+    }
+
+    public function enrichWithMetadataAuthor(string $author): void
+    {
+        $this->metadataAuthor = $author;
+    }
+
+    public function getActualAuthor(): string
+    {
+        return $this->metadataAuthor ?? $this->author;
     }
 
     public function markAsProcessing(): void

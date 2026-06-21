@@ -29,4 +29,6 @@ interface JobRepositoryInterface
     public function cancel(Uuid $jobId): void;
 
     public function fail(Uuid $jobId): void;
+
+    public function enrichWithMetadataAuthor(Uuid $jobId, string $author): void;
 }

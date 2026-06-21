@@ -81,4 +81,11 @@ class DoctrineJobRepository extends ServiceEntityRepository implements JobReposi
     {
         return $this->find($jobId);
     }
+
+    public function enrichWithMetadataAuthor(Uuid $jobId, string $author): void
+    {
+        $job = $this->find($jobId);
+        $job->enrichWithMetadataAuthor($author);
+        $this->getEntityManager()->flush();
+    }
 }

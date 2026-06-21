@@ -52,7 +52,7 @@ class AudioDownloadEventHandler
                 $this->jobRepository->complete($event->jobId);
             } else {
                 if ($this->trackRepository->allTracksCompleted($event->albumId)) {
-                    $artist = $this->jobRepository->findById($event->jobId)->getAuthor();
+                    $artist = $this->jobRepository->findById($event->jobId)->getActualAuthor();
                     $albumTitle = $this->albumRepository->getTitleById($event->albumId);
                     $tracks = $this->trackRepository->getAlbumTracksData($event->albumId);
                     $this->messageBus->dispatch(new ArchiveAlbumMessage($artist, $albumTitle, $tracks));
