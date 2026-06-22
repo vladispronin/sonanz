@@ -1,0 +1,36 @@
+sources:
+  redis_logs:
+    type: redis
+    url: "redis://redis:6379"
+    key: sonanz_logs
+    data_type: list
+
+transforms:
+  parse_json:
+    type: remap
+    inputs: [redis_logs]
+    source: |
+      parsed, err = parse_json(.message)
+      if err != null || !exists(parsed.level_name) {
+        abort
+      }
+      .message        = string!(parsed.message)
+      .timestamp      = parsed.datetime
+      .level          = downcase(string!(parsed.level_name))
+      .channel        = string!(parsed.channel)
+      .correlation_id = string(parsed.extra.correlation_id) ?? ""
+      .context        = parsed.context
+      del(.source_type)
+
+sinks:
+  loki:
+    type: loki
+    inputs: [parse_json]
+    endpoint: "http://loki:3100"
+    labels:
+      app: "sonanz"
+      level: "{{ level }}"
+      channel: "{{ channel }}"
+    encoding:
+      codec: json
+    out_of_order_action: accept

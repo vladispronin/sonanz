@@ -61,3 +61,11 @@ services:
             $httpClient: '@coverart.http_client'
 
     App\Tag\Domain\Port\CoverArtProviderInterface: '@App\Tag\Infrastructure\Adapter\CoverArtArchive\CoverArtArchiveProvider'
+
+    App\Shared\Infrastructure\Logging\CorrelationIdProcessor:
+        tags:
+            - { name: monolog.processor }
+
+    Predis\Client:
+        arguments:
+            - '%env(REDIS_URL)%'
