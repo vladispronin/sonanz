@@ -40,6 +40,9 @@ class Track
     #[ORM\Column(length: 255)]
     private string $title;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $metadataAuthor = null;
+
     public function __construct(
         Uuid $jobId,
         string $url,
@@ -82,6 +85,11 @@ class Track
         return $this->title;
     }
 
+    public function getMetadataAuthor(): ?string
+    {
+        return $this->metadataAuthor;
+    }
+
     public function markAsDownloaded(): void
     {
         $this->status = TrackStatusEnum::Downloaded;
@@ -105,5 +113,10 @@ class Track
     public function updateTitle(string $title): void
     {
         $this->title = $title;
+    }
+
+    public function enrichWithMetadataAuthor(string $author): void
+    {
+        $this->metadataAuthor = $author;
     }
 }

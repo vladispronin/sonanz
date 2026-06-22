@@ -9,6 +9,7 @@ final readonly class MusicBrainzMetadataDTO
     private function __construct(
         public ?string $title,
         public ?string $artist,
+        public ?string $albumArtist,
         public ?string $album,
         public ?int $trackNumber,
         public ?string $releaseGroupId,
@@ -27,10 +28,26 @@ final readonly class MusicBrainzMetadataDTO
 
         return new self(
             title: $recording['title'] ?? null,
-            artist: $recording['artist-credit'][0]['name'] ?? null,
+            artist: self::getArtistsAsString($recording['artist-credit']),
+            albumArtist: self::getArtistsAsString($release['artist-credit']),
             album: $releaseGroup['title'] ?? null,
             trackNumber: isset($track['number']) ? (int) $track['number'] : null,
             releaseGroupId: $releaseGroup['id'] ?? null,
         );
+    }
+
+    private static function getArtistsAsString(array $artists): string
+    {
+        $result = '';
+
+        foreach ($artists as $artist) {
+            if (isset($artist['joinphrase'])) {
+                $result .= $artist['name'] . $artist['joinphrase'];
+            } else {
+                $result .= $artist['name'];
+            }
+        }
+
+        return $result;
     }
 }

@@ -9,6 +9,7 @@ final readonly class AcoustIdMetadataDTO
     private function __construct(
         public ?string $title,
         public ?string $artist,
+        public ?string $albumArtist,
         public ?string $album,
         public ?int $trackNumber,
         public ?string $releaseGroupId,
@@ -29,11 +30,27 @@ final readonly class AcoustIdMetadataDTO
 
         return new self(
             title: $recording['title'] ?? null,
-            artist: $recording['artists'][0]['name'] ?? null,
+            artist: self::getArtistsAsString($recording['artists']) ?? null,
+            albumArtist: self::getArtistsAsString($releaseGroup['artists']) ?? null,
             album: $releaseGroup['title'] ?? null,
             trackNumber: isset($track['position']) ? (int) $track['position'] : null,
             releaseGroupId: $releaseGroup['id'] ?? null,
             score: (float) ($result['score'] ?? 0),
         );
+    }
+
+    private static function getArtistsAsString(array $artists): string
+    {
+        $result = '';
+
+        foreach ($artists as $artist) {
+            if (isset($artist['joinphrase'])) {
+                $result .= $artist['name'] . $artist['joinphrase'];
+            } else {
+                $result .= $artist['name'];
+            }
+        }
+
+        return $result;
     }
 }

@@ -29,7 +29,7 @@ class ArchiveAlbumMessageHandler
         foreach ($tracks as $track) {
             $filePath = '/tmp/' . $track->id . '.mp3';
             if (file_exists($filePath)) {
-                $zip->addFile($filePath, $authorName . ' — ' .$track->title . '.mp3');
+                $zip->addFile($filePath, $track->author . ' — ' . $track->title . '.mp3');
             }
         }
 

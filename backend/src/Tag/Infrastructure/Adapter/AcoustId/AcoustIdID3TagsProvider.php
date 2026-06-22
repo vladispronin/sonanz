@@ -39,6 +39,7 @@ class AcoustIdID3TagsProvider implements ID3TagsProviderInterface
         return new TrackMetadata(
             title: $dto->title,
             artist: $dto->artist,
+            albumArtist: $dto->albumArtist,
             album: $dto->album,
             trackNumber: $dto->trackNumber,
             releaseGroupId: $dto->releaseGroupId,

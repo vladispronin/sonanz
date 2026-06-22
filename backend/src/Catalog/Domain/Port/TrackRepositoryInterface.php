@@ -31,4 +31,6 @@ interface TrackRepositoryInterface
     public function allTracksCompleted(Uuid $albumId): bool;
 
     public function updateTitle(Uuid $trackId, string $title): void;
+
+    public function enrichWithMetadataAuthor(Uuid $trackId, string $author): void;
 }

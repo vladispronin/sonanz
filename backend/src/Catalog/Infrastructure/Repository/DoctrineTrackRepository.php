@@ -78,6 +78,7 @@ class DoctrineTrackRepository extends ServiceEntityRepository implements TrackRe
         return array_map(
             fn(Track $track) => new TrackArchiveEntry(
                 id: $track->getId(),
+                author: $track->getMetadataAuthor(),
                 title: $track->getTitle(),
             ),
             $tracks,
@@ -88,6 +89,13 @@ class DoctrineTrackRepository extends ServiceEntityRepository implements TrackRe
     {
         $track = $this->find($trackId);
         $track->updateTitle($title);
+        $this->getEntityManager()->flush();
+    }
+
+    public function enrichWithMetadataAuthor(Uuid $trackId, string $author): void
+    {
+        $track = $this->find($trackId);
+        $track->enrichWithMetadataAuthor($author);
         $this->getEntityManager()->flush();
     }
 

@@ -10,6 +10,7 @@ final readonly class TrackArchiveEntry
 {
     public function __construct(
         public Uuid $id,
+        public ?string $author,
         public string $title,
     ) {}
 }

@@ -57,7 +57,7 @@ class TagAudioMessageHandler
 
         $this->messageBus->dispatch(new AudioTaggedEvent(
             $message->trackId,
-            new TrackTagMetadata($ID3Tags->title, $ID3Tags->album, $ID3Tags->artist),
+            new TrackTagMetadata($ID3Tags->title, $ID3Tags->album, $ID3Tags->artist, $ID3Tags->albumArtist),
         ));
     }
 

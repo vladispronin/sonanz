@@ -12,7 +12,6 @@ class YtDlpAudioDownloadProvider implements AudioDownloadProviderInterface
 {
     public function __construct(
         private string $ytDlpBin = 'yt-dlp',
-        private string $proxy = '',
         private string $denoBin = '',
         private string $cookiesFile = '',
     ) {}
@@ -36,9 +35,10 @@ class YtDlpAudioDownloadProvider implements AudioDownloadProviderInterface
     {
         $cmd = [$this->ytDlpBin];
 
-        if ($this->proxy !== '') {
+        $proxy = $_SERVER['YT_DLP_PROXY'] ?? '';
+        if ($proxy !== '') {
             $cmd[] = '--proxy';
-            $cmd[] = $this->proxy;
+            $cmd[] = $proxy;
         }
 
         if ($this->denoBin !== '') {

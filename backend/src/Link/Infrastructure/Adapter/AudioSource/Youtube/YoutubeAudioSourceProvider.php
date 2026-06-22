@@ -61,8 +61,7 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
 
         $searchResultDTO = ApiSearchResultDTO::fromArray($searchData);
 
-        $normalizedQuery = $query->author . ' ' . $query->title;
-        $bestItem = $this->pickBestItem($searchResultDTO->items, $normalizedQuery);
+        $bestItem = $this->pickBestItem($searchResultDTO->items, $query);
 
         if ($bestItem === null) {
             return [];
@@ -110,16 +109,28 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
     /**
      * @param SearchResultItemDTO[] $items
      */
-    private function pickBestItem(array $items, string $query): ?SearchResultItemDTO
+    private function pickBestItem(array $items, AudioSearchQuery $query): ?SearchResultItemDTO
     {
+        $titleQuery = $query->author . ' ' . $query->title;
         $bestScore = 0.0;
         $bestItem = null;
 
         foreach ($items as $item) {
-            $score = $this->relevanceScorer->score($query, $item->snippet->title);
+            $score = $this->relevanceScorer->score($titleQuery, $item->snippet->title);
+
+            if ($query->titleType === TitleTypeEnum::Album
+                && $this->channelMatchesAuthor($item->snippet->channelTitle, $query->author)
+            ) {
+                $score = 1.0;
+            }
+
             if ($score > $bestScore) {
                 $bestScore = $score;
                 $bestItem = $item;
+            }
+
+            if ($bestScore >= 1.0) {
+                break;
             }
         }
 
@@ -128,6 +139,16 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
         }
 
         return $bestItem;
+    }
+
+    private function channelMatchesAuthor(string $channelTitle, string $author): bool
+    {
+        $normalize = static fn(string $s): string => mb_strtolower(
+            preg_replace('/[^\p{L}\p{N}]/u', '', $s),
+            'UTF-8'
+        );
+
+        return str_contains($normalize($channelTitle), $normalize($author));
     }
 
     private function buildSearchString(AudioSearchQuery $query): string

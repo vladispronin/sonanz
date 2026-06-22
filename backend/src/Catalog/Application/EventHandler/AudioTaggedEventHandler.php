@@ -30,6 +30,10 @@ class AudioTaggedEventHandler
             $this->trackRepository->updateTitle($event->trackId, $event->metadata->trackTitle);
         }
 
+        if ($event->metadata?->artist !== null) {
+            $this->trackRepository->enrichWithMetadataAuthor($event->trackId, $event->metadata->artist);
+        }
+
         $track = $this->trackRepository->findById($event->trackId);
         $album = $track->getAlbum();
         $jobId = $track->getJobId();
@@ -51,7 +55,7 @@ class AudioTaggedEventHandler
         }
 
         if ($event->metadata?->artist !== null) {
-            $this->jobRepository->enrichWithMetadataAuthor($jobId, $event->metadata->artist);
+            $this->jobRepository->enrichWithMetadataAuthor($jobId, $event->metadata->albumArtist);
         }
 
         $job = $this->jobRepository->findById($jobId);

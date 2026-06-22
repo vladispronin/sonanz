@@ -10,5 +10,6 @@ final readonly class TrackTagMetadata
         public ?string $trackTitle,
         public ?string $albumTitle,
         public ?string $artist,
+        public ?string $albumArtist,
     ) {}
 }
