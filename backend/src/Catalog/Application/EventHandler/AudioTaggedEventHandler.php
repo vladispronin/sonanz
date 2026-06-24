@@ -7,6 +7,7 @@ namespace App\Catalog\Application\EventHandler;
 use App\Catalog\Domain\Port\AlbumRepositoryInterface;
 use App\Catalog\Domain\Port\JobRepositoryInterface;
 use App\Catalog\Domain\Port\TrackRepositoryInterface;
+use App\Catalog\Domain\ValueObject\JobProgress;
 use App\Shared\Application\Event\AudioTaggedEvent;
 use App\Shared\Application\Message\ArchiveAlbumMessage;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -40,13 +41,15 @@ class AudioTaggedEventHandler
 
         if ($album === null) {
             $this->trackRepository->markAsCompleted($event->trackId);
+
+            $this->jobRepository->updateProgress($jobId, JobProgress::JOB_COMPLETED);
             $this->jobRepository->complete($jobId);
             return;
         }
 
         $this->trackRepository->markAsCompleted($event->trackId);
 
-        if (!$this->trackRepository->allTracksCompleted($album->getId())) {
+        if (!$this->trackRepository->allTracksHandled($album->getId())) {
             return;
         }
 
@@ -61,6 +64,8 @@ class AudioTaggedEventHandler
         $job = $this->jobRepository->findById($jobId);
         $tracks = $this->trackRepository->getAlbumTracksData($album->getId());
 
-        $this->messageBus->dispatch(new ArchiveAlbumMessage($job->getActualAuthor(), $album->getTitle(), $tracks));
+        $this->jobRepository->updateProgress($jobId, JobProgress::MEDIA_TAGGED);
+
+        $this->messageBus->dispatch(new ArchiveAlbumMessage($job->getActualAuthor(), $album->getTitle(), $tracks, $jobId));
     }
 }

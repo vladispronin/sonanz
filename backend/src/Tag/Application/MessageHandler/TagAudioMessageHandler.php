@@ -12,6 +12,7 @@ use App\Tag\Domain\Port\FingerprintProviderInterface;
 use App\Tag\Domain\Port\ID3TagsProviderInterface;
 use App\Tag\Domain\ValueObject\AudioTagQuery;
 use App\Tag\Domain\ValueObject\TrackMetadata;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Uid\Uuid;
@@ -23,18 +24,20 @@ class TagAudioMessageHandler
     private ID3TagsProviderInterface $id3TagsProvider;
     private CoverArtProviderInterface $coverArtProvider;
     private MessageBusInterface $messageBus;
+    private LoggerInterface $logger;
 
     public function __construct(
         FingerprintProviderInterface $fingerprintProvider,
         ID3TagsProviderInterface $id3TagsProvider,
         CoverArtProviderInterface $coverArtProvider,
-        MessageBusInterface $messageBus
-    )
-    {
+        MessageBusInterface $messageBus,
+        LoggerInterface $logger,
+    ) {
         $this->fingerprintProvider = $fingerprintProvider;
         $this->id3TagsProvider = $id3TagsProvider;
         $this->coverArtProvider = $coverArtProvider;
         $this->messageBus = $messageBus;
+        $this->logger = $logger;
     }
 
     public function __invoke(TagAudioMessage $message): void
@@ -48,6 +51,9 @@ class TagAudioMessageHandler
         $ID3Tags = $this->getID3Tags($tagQuery);
 
         if (is_null($ID3Tags)) {
+            $this->logger->warning('ID3-теги не найдены, обработка трека остановлена', [
+                'track_id' => $message->trackId->toString(),
+            ]);
             return;
         }
 

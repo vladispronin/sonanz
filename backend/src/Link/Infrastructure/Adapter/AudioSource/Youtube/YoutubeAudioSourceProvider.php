@@ -13,6 +13,7 @@ use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum\SearchObjectTypeEnu
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Service\TitleRelevanceScorer;
 use App\Shared\Domain\Enum\TitleTypeEnum;
 use App\Shared\Domain\ValueObject\AudioSourceLink;
+use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Throwable;
 
@@ -28,11 +29,13 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
     private const int SEARCH_MAX_RESULTS = 5;
     private const int PLAYLIST_TRACKS_MAX_RESULTS = 50;
     private const float RELEVANCE_THRESHOLD = 0.3;
+    private const float TITLE_SUBSTRING_BOOST = 0.4;
 
     public function __construct(
         private HttpClientInterface $httpClient,
         private string $youtubeApiKey,
         private TitleRelevanceScorer $relevanceScorer,
+        private LoggerInterface $logger,
     ) {}
 
     /**
@@ -118,6 +121,13 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
         foreach ($items as $item) {
             $score = $this->relevanceScorer->score($titleQuery, $item->snippet->title);
 
+            if (str_contains(
+                mb_strtolower($item->snippet->title, 'UTF-8'),
+                mb_strtolower($query->title, 'UTF-8'),
+            )) {
+                $score = min(1.0, $score + self::TITLE_SUBSTRING_BOOST);
+            }
+
             if ($query->titleType === TitleTypeEnum::Album
                 && $this->channelMatchesAuthor($item->snippet->channelTitle, $query->author)
             ) {
@@ -173,8 +183,9 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
 
             return json_decode($content, true);
         } catch (Throwable $e) {
-            //TODO logging exception
-
+            $this->logger->error('Ошибка запроса к YouTube API: ' . $e->getMessage(), [
+                'url' => $url,
+            ]);
             return null;
         }
     }

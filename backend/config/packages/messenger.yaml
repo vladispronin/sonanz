@@ -15,8 +15,17 @@ framework:
             sync: 'sync://'
 
         routing:
-            # Route your messages to the transports
-            # 'App\Message\YourMessage': async
+            App\Shared\Application\Message\CreateJobMessage: sync
+            App\Shared\Application\Message\ArchiveAlbumMessage: sync
+            App\Shared\Application\Message\LinkSearchMessage: sync
+            App\Shared\Application\Message\TagAudioMessage: sync
+            App\Shared\Application\Event\LinksFoundEvent: sync
+            App\Shared\Application\Event\TrackCreatedEvent: sync
+            App\Shared\Application\Event\JobFailedEvent: sync
+            App\Shared\Application\Event\AudioDownloadedEvent: sync
+            App\Shared\Application\Event\AudioTaggedEvent: sync
+            App\Shared\Application\Event\AlbumArchivedEvent: sync
+            App\Shared\Application\Event\TrackFailedEvent: sync
 
 # when@test:
 #    framework:

@@ -28,7 +28,7 @@ interface TrackRepositoryInterface
      */
     public function getAlbumTracksData(Uuid $albumId): array;
 
-    public function allTracksCompleted(Uuid $albumId): bool;
+    public function allTracksHandled(Uuid $albumId): bool;
 
     public function updateTitle(Uuid $trackId, string $title): void;
 

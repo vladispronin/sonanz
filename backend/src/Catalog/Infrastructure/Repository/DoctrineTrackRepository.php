@@ -99,14 +99,14 @@ class DoctrineTrackRepository extends ServiceEntityRepository implements TrackRe
         $this->getEntityManager()->flush();
     }
 
-    public function allTracksCompleted(Uuid $albumId): bool
+    public function allTracksHandled(Uuid $albumId): bool
     {
         $count = $this->createQueryBuilder('t')
             ->select('COUNT(t.id)')
             ->where('t.album = :albumId')
-            ->andWhere('t.status != :status')
+            ->andWhere('t.status NOT IN (:statuses)')
             ->setParameter('albumId', $albumId)
-            ->setParameter('status', TrackStatusEnum::Completed)
+            ->setParameter('statuses', [TrackStatusEnum::Completed, TrackStatusEnum::Failed])
             ->getQuery()
             ->getSingleScalarResult();
 

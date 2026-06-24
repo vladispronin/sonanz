@@ -66,6 +66,10 @@ services:
         tags:
             - { name: monolog.processor }
 
+    App\Shared\Infrastructure\Logging\SensitiveDataProcessor:
+        tags:
+            - { name: monolog.processor }
+
     Predis\Client:
         arguments:
             - '%env(REDIS_URL)%'
