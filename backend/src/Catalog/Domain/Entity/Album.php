@@ -24,7 +24,7 @@ class Album
     #[ORM\Column]
     private DateTimeImmutable $updatedAt;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(type: UuidType::NAME)]
     private Uuid $jobId;
 
     #[ORM\Column(length: 255)]

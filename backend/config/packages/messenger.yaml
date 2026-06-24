@@ -1,36 +1,89 @@
 framework:
     messenger:
-        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
-        # failure_transport: failed
-
         buses:
             messenger.bus.default:
                 middleware:
                     - App\Shared\Infrastructure\Messenger\Middleware\LoggingMessengerMiddleware
 
         transports:
-            # https://symfony.com/doc/current/messenger.html#transport-configuration
-            # async: '%env(MESSENGER_TRANSPORT_DSN)%'
-            # failed: 'doctrine://default?queue_name=failed'
+            # Для локального дебаггинга без RabbitMQ: раскомментировать sync-routing ниже
+            # и закомментировать блок async/downloads/tagging/links
             sync: 'sync://'
 
-        routing:
-            App\Shared\Application\Message\CreateJobMessage: sync
-            App\Shared\Application\Message\ArchiveAlbumMessage: sync
-            App\Shared\Application\Message\LinkSearchMessage: sync
-            App\Shared\Application\Message\TagAudioMessage: sync
-            App\Shared\Application\Event\LinksFoundEvent: sync
-            App\Shared\Application\Event\TrackCreatedEvent: sync
-            App\Shared\Application\Event\JobFailedEvent: sync
-            App\Shared\Application\Event\AudioDownloadedEvent: sync
-            App\Shared\Application\Event\AudioTaggedEvent: sync
-            App\Shared\Application\Event\AlbumArchivedEvent: sync
-            App\Shared\Application\Event\TrackFailedEvent: sync
+            async:
+                dsn: '%env(RABBITMQ_DSN)%'
+                options:
+                    exchange:
+                        name: async
+                        type: direct
+                    queues:
+                        async: ~
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
 
-# when@test:
-#    framework:
-#        messenger:
-#            transports:
-#                # replace with your transport name here (e.g., my_transport: 'in-memory://')
-#                # For more Messenger testing tools, see https://github.com/zenstruck/messenger-test
-#                async: 'in-memory://'
+            downloads:
+                dsn: '%env(RABBITMQ_DSN)%'
+                options:
+                    exchange:
+                        name: downloads
+                        type: direct
+                    queues:
+                        downloads: ~
+                retry_strategy:
+                    max_retries: 2
+                    delay: 5000
+                    multiplier: 2
+
+            tagging:
+                dsn: '%env(RABBITMQ_DSN)%'
+                options:
+                    exchange:
+                        name: tagging
+                        type: direct
+                    queues:
+                        tagging: ~
+                retry_strategy:
+                    max_retries: 3
+                    delay: 2000
+                    multiplier: 2
+
+            links:
+                dsn: '%env(RABBITMQ_DSN)%'
+                options:
+                    exchange:
+                        name: links
+                        type: direct
+                    queues:
+                        links: ~
+                retry_strategy:
+                    max_retries: 3
+                    delay: 1000
+                    multiplier: 2
+
+        routing:
+            # --- Для локального дебаггинга без RabbitMQ ---
+            # App\Shared\Application\Message\CreateJobMessage: sync
+            # App\Shared\Application\Message\ArchiveAlbumMessage: sync
+            # App\Shared\Application\Message\LinkSearchMessage: sync
+            # App\Shared\Application\Message\TagAudioMessage: sync
+            # App\Shared\Application\Event\LinksFoundEvent: sync
+            # App\Shared\Application\Event\TrackCreatedEvent: sync
+            # App\Shared\Application\Event\JobFailedEvent: sync
+            # App\Shared\Application\Event\AudioDownloadedEvent: sync
+            # App\Shared\Application\Event\AudioTaggedEvent: sync
+            # App\Shared\Application\Event\AlbumArchivedEvent: sync
+            # App\Shared\Application\Event\TrackFailedEvent: sync
+
+            App\Shared\Application\Event\TrackCreatedEvent: downloads
+            App\Shared\Application\Message\TagAudioMessage: tagging
+            App\Shared\Application\Message\LinkSearchMessage: links
+            App\Shared\Application\Message\CreateJobMessage: async
+            App\Shared\Application\Message\ArchiveAlbumMessage: async
+            App\Shared\Application\Event\LinksFoundEvent: async
+            App\Shared\Application\Event\JobFailedEvent: async
+            App\Shared\Application\Event\AudioDownloadedEvent: async
+            App\Shared\Application\Event\AudioTaggedEvent: async
+            App\Shared\Application\Event\AlbumArchivedEvent: async
+            App\Shared\Application\Event\TrackFailedEvent: async

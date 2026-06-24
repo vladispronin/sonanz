@@ -16,12 +16,22 @@ use Symfony\Component\Messenger\MessageBusInterface;
 #[AsMessageHandler]
 class AudioTaggedEventHandler
 {
+    private TrackRepositoryInterface $trackRepository;
+    private AlbumRepositoryInterface $albumRepository;
+    private JobRepositoryInterface $jobRepository;
+    private MessageBusInterface $messageBus;
+
     public function __construct(
-        private TrackRepositoryInterface $trackRepository,
-        private AlbumRepositoryInterface $albumRepository,
-        private JobRepositoryInterface $jobRepository,
-        private MessageBusInterface $messageBus,
-    ) {}
+        TrackRepositoryInterface $trackRepository,
+        AlbumRepositoryInterface $albumRepository,
+        JobRepositoryInterface $jobRepository,
+        MessageBusInterface $messageBus,
+    ) {
+        $this->trackRepository = $trackRepository;
+        $this->albumRepository = $albumRepository;
+        $this->jobRepository = $jobRepository;
+        $this->messageBus = $messageBus;
+    }
 
     public function __invoke(AudioTaggedEvent $event): void
     {
