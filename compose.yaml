@@ -107,7 +107,7 @@ services:
 
   worker-catalog:
     <<: [*app-env, *app-build]
-    command: php bin/console messenger:consume async --time-limit=3600 --memory-limit=256M -vv
+    command: supervisord -n -c /app/docker/supervisor/async.conf
     restart: unless-stopped
     volumes:
       - audio_tmp:/tmp
@@ -119,7 +119,7 @@ services:
 
   worker-link:
     <<: [*app-env, *app-build]
-    command: php bin/console messenger:consume links --time-limit=3600 --memory-limit=256M -vv
+    command: supervisord -n -c /app/docker/supervisor/links.conf
     restart: unless-stopped
     depends_on:
       rabbitmq:
@@ -130,7 +130,7 @@ services:
     build:
       context: ./backend
       target: download
-    command: php bin/console messenger:consume downloads --time-limit=3600 --memory-limit=512M -vv
+    command: supervisord -n -c /app/docker/supervisor/downloads.conf
     restart: unless-stopped
     volumes:
       - audio_tmp:/tmp
@@ -140,7 +140,7 @@ services:
 
   worker-tag:
     <<: [*app-env, *app-build]
-    command: php bin/console messenger:consume tagging --time-limit=3600 --memory-limit=256M -vv
+    command: supervisord -n -c /app/docker/supervisor/tagging.conf
     restart: unless-stopped
     volumes:
       - audio_tmp:/tmp

@@ -17,5 +17,6 @@ final readonly class ArchiveAlbumMessage
         public string $albumTitle,
         public array $tracks,
         public Uuid $jobId,
+        public Uuid $albumId,
     ) {}
 }

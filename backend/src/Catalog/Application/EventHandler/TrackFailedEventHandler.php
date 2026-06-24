@@ -42,6 +42,6 @@ class TrackFailedEventHandler
 
         $this->jobRepository->updateProgress($event->jobId, JobProgress::MEDIA_DOWNLOADED);
 
-        $this->messageBus->dispatch(new ArchiveAlbumMessage($artist, $albumTitle, $tracks, $event->jobId));
+        $this->messageBus->dispatch(new ArchiveAlbumMessage($artist, $albumTitle, $tracks, $event->jobId, $event->albumId));
     }
 }

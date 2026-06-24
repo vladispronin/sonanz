@@ -4,7 +4,8 @@ WORKDIR /app
 
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN apk add --no-cache chromaprint
+RUN apk add --no-cache chromaprint supervisor \
+    && mkdir -p /app/var/log/supervisor /app/var/run
 
 RUN install-php-extensions \
     pdo_pgsql \

@@ -27,30 +27,33 @@ class ArchiveAlbumMessageHandler
 
     public function __invoke(ArchiveAlbumMessage $message): void
     {
-        $this->archive($message->artist, $message->albumTitle, $message->tracks);
+        $this->archive($message);
 
         $this->messageBus->dispatch(new AlbumArchivedEvent($message->jobId));
     }
 
-    /**
-     * @param TrackArchiveEntry[] $tracks
-     */
-    private function archive(string $authorName, string $albumTitle, array $tracks): void
+    private function archive(ArchiveAlbumMessage $message): void
     {
         $zip = new \ZipArchive();
-        $archivePath = '/tmp/' . $authorName . ' — ' . $albumTitle . '.zip';
+        $archivePath = '/tmp/' . $message->albumId->toString() . '.zip';
 
         $zip->open($archivePath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
-        foreach ($tracks as $track) {
+        $addedFiles = [];
+        foreach ($message->tracks as $track) {
             $filePath = '/tmp/' . $track->id . '.mp3';
             if (!file_exists($filePath)) {
                 $this->logger->warning('Файл трека не найден при архивации', ['path' => $filePath]);
                 continue;
             }
             $zip->addFile($filePath, $track->author . ' — ' . $track->title . '.mp3');
+            $addedFiles[] = $filePath;
         }
 
         $zip->close();
+
+        foreach ($addedFiles as $filePath) {
+            unlink($filePath);
+        }
     }
 }

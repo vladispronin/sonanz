@@ -76,6 +76,6 @@ class AudioTaggedEventHandler
 
         $this->jobRepository->updateProgress($jobId, JobProgress::MEDIA_TAGGED);
 
-        $this->messageBus->dispatch(new ArchiveAlbumMessage($job->getActualAuthor(), $album->getTitle(), $tracks, $jobId));
+        $this->messageBus->dispatch(new ArchiveAlbumMessage($job->getActualAuthor(), $album->getTitle(), $tracks, $jobId, $album->getId()));
     }
 }
