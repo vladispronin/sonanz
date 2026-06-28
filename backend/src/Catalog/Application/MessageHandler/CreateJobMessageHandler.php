@@ -29,6 +29,7 @@ class CreateJobMessageHandler
     {
         $this->jobRepository->create(
             $message->author,
+            $message->userId,
             $message->title,
             $message->titleType,
             $message->id,

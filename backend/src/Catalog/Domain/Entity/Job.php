@@ -34,6 +34,9 @@ class Job
     #[ORM\Column(length: 255)]
     private JobStatusEnum $status;
 
+    #[ORM\Column(type: UuidType::NAME)]
+    private Uuid $userId;
+
     #[ORM\Column]
     private int $progress = JobProgress::JOB_INITIATED;
 
@@ -54,6 +57,7 @@ class Job
 
     public function __construct(
         string $author,
+        Uuid $userId,
         string $title,
         TitleTypeEnum $titleType,
         ?Uuid $id = null,
@@ -63,6 +67,7 @@ class Job
         $this->id = $id ?? Uuid::v7();
 
         $this->author = $author;
+        $this->userId = $userId;
         $this->title = $title;
         $this->titleType = $titleType;
         $this->withMetadata = $withMetadata;

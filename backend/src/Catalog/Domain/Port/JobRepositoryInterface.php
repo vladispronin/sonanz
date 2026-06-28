@@ -12,6 +12,7 @@ interface JobRepositoryInterface
 {
     public function create(
         string $author,
+        Uuid $userId,
         string $title,
         TitleTypeEnum $titleType,
         ?Uuid $id = null,

@@ -7,6 +7,7 @@ namespace App\Api\Infrastructure\Controller;
 use App\Shared\Application\Message\CreateJobMessage;
 use App\Api\Infrastructure\Request\CreateJobRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
@@ -26,12 +27,18 @@ class JobController
         name: 'api_job_create',
         methods: ['POST']
     )]
-    public function create(#[MapRequestPayload] CreateJobRequest $request): JsonResponse
+    public function create(
+        #[MapRequestPayload] CreateJobRequest $request,
+        Request $httpRequest,
+    ): JsonResponse
     {
+        $userId = $httpRequest->attributes->get('clientId');
+
         $jobId = Uuid::v7();
 
         $this->messageBus->dispatch(new CreateJobMessage(
             $jobId,
+            $userId,
             $request->author,
             $request->title,
             $request->titleType,

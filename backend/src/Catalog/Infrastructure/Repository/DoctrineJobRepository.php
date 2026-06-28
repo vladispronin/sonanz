@@ -21,6 +21,7 @@ class DoctrineJobRepository extends ServiceEntityRepository implements JobReposi
 
     public function create(
         string $author,
+        Uuid $userId,
         string $title,
         TitleTypeEnum $titleType,
         ?Uuid $id = null,
@@ -29,6 +30,7 @@ class DoctrineJobRepository extends ServiceEntityRepository implements JobReposi
     {
         $job = new Job(
             $author,
+            $userId,
             $title,
             $titleType,
             $id,

@@ -11,6 +11,7 @@ final readonly class CreateJobMessage
 {
     public function __construct(
         public Uuid $id,
+        public Uuid $userId,
         public string $author,
         public string $title,
         public TitleTypeEnum $titleType,
