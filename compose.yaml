@@ -1,0 +1,158 @@
+
+x-app-env: &app-env
+  env_file: ./backend/.env
+  environment:
+    DATABASE_URL: "postgresql://${POSTGRES_USER:-sonanz}:${POSTGRES_PASSWORD:-sonanz}@database:5432/${POSTGRES_DB:-sonanz}?serverVersion=16&charset=utf8"
+    RABBITMQ_DSN: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/%2f"
+    REDIS_URL: "redis://redis:6379"
+    YT_DLP_BIN: "yt-dlp"
+    YT_DLP_DENO_BIN: "deno"
+
+
+x-app-build: &app-build
+  build:
+    context: ./backend
+    target: base
+
+services:
+###> doctrine/doctrine-bundle ###
+  database:
+    image: postgres:${POSTGRES_VERSION:-16}-alpine
+    env_file: ./backend/.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sonanz}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sonanz}
+      POSTGRES_USER: ${POSTGRES_USER:-sonanz}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-sonanz}", "-U", "${POSTGRES_USER:-sonanz}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
+###< doctrine/doctrine-bundle ###
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+
+  loki:
+    image: grafana/loki:3.4.2
+    command: -config.file=/etc/loki/loki.yaml
+    volumes:
+      - ./backend/docker/loki/loki.yaml:/etc/loki/loki.yaml:ro
+      - loki_data:/loki
+    ports:
+      - "3100:3100"
+
+  vector:
+    image: timberio/vector:0.45.0-alpine
+    volumes:
+      - ./backend/docker/vector/vector.yaml:/etc/vector/vector.yaml:ro
+    depends_on:
+      - redis
+      - loki
+
+  grafana:
+    image: grafana/grafana:11.6.1
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    volumes:
+      - ./backend/docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - loki
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  php:
+    <<: [*app-env, *app-build]
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  api:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./backend/public:/app/public:ro
+      - ./backend/docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php
+    restart: unless-stopped
+
+  worker-catalog:
+    <<: [*app-env, *app-build]
+    command: supervisord -n -c /app/docker/supervisor/async.conf
+    restart: unless-stopped
+    volumes:
+      - audio_tmp:/tmp
+    depends_on:
+      database:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  worker-link:
+    <<: [*app-env, *app-build]
+    command: supervisord -n -c /app/docker/supervisor/links.conf
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  worker-download:
+    <<: *app-env
+    build:
+      context: ./backend
+      target: download
+    command: supervisord -n -c /app/docker/supervisor/downloads.conf
+    restart: unless-stopped
+    volumes:
+      - audio_tmp:/tmp
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  worker-tag:
+    <<: [*app-env, *app-build]
+    command: supervisord -n -c /app/docker/supervisor/tagging.conf
+    restart: unless-stopped
+    volumes:
+      - audio_tmp:/tmp
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+volumes:
+###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###
+  loki_data:
+  grafana_data:
+  rabbitmq_data:
+  audio_tmp:
