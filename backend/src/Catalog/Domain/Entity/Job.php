@@ -77,9 +77,24 @@ class Job
         $this->updatedAt = new DateTimeImmutable();
     }
 
+    public function getId(): Uuid
+    {
+        return $this->id;
+    }
+
     public function getAuthor(): string
     {
         return $this->author;
+    }
+
+    public function getStatus(): JobStatusEnum
+    {
+        return $this->status;
+    }
+
+    public function getProgress(): int
+    {
+        return $this->progress;
     }
 
     public function enrichWithMetadataAuthor(string $author): void

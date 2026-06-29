@@ -63,27 +63,31 @@ framework:
                     multiplier: 2
 
         routing:
-            # --- Для локального дебаггинга без RabbitMQ ---
-            # App\Shared\Application\Message\CreateJobMessage: sync
-            # App\Shared\Application\Message\ArchiveAlbumMessage: sync
-            # App\Shared\Application\Message\LinkSearchMessage: sync
-            # App\Shared\Application\Message\TagAudioMessage: sync
-            # App\Shared\Application\Event\LinksFoundEvent: sync
-            # App\Shared\Application\Event\TrackCreatedEvent: sync
-            # App\Shared\Application\Event\JobFailedEvent: sync
-            # App\Shared\Application\Event\AudioDownloadedEvent: sync
-            # App\Shared\Application\Event\AudioTaggedEvent: sync
-            # App\Shared\Application\Event\AlbumArchivedEvent: sync
-            # App\Shared\Application\Event\TrackFailedEvent: sync
+            # --- Для локального дебаггинга без брокера очередей ---
+            App\Shared\Application\Message\CreateJobMessage: sync
+            App\Shared\Application\Message\ArchiveAlbumMessage: sync
+            App\Shared\Application\Message\LinkSearchMessage: sync
+            App\Shared\Application\Message\TagAudioMessage: sync
+            App\Shared\Application\Event\LinksFoundEvent: sync
+            App\Shared\Application\Event\TrackCreatedEvent: sync
+            App\Shared\Application\Event\JobFailedEvent: sync
+            App\Shared\Application\Event\AudioDownloadedEvent: sync
+            App\Shared\Application\Event\AudioTaggedEvent: sync
+            App\Shared\Application\Event\AlbumArchivedEvent: sync
+            App\Shared\Application\Event\TrackFailedEvent: sync
 
-            App\Shared\Application\Event\TrackCreatedEvent: downloads
-            App\Shared\Application\Message\TagAudioMessage: tagging
-            App\Shared\Application\Message\LinkSearchMessage: links
-            App\Shared\Application\Message\CreateJobMessage: async
-            App\Shared\Application\Message\ArchiveAlbumMessage: async
-            App\Shared\Application\Event\LinksFoundEvent: async
-            App\Shared\Application\Event\JobFailedEvent: async
-            App\Shared\Application\Event\AudioDownloadedEvent: async
-            App\Shared\Application\Event\AudioTaggedEvent: async
-            App\Shared\Application\Event\AlbumArchivedEvent: async
-            App\Shared\Application\Event\TrackFailedEvent: async
+            # --- Асинхронные транспорты для прода ---
+#            App\Shared\Application\Event\TrackCreatedEvent: downloads
+#            App\Shared\Application\Message\TagAudioMessage: tagging
+#            App\Shared\Application\Message\LinkSearchMessage: links
+#            App\Shared\Application\Message\CreateJobMessage: async
+#            App\Shared\Application\Message\ArchiveAlbumMessage: async
+#            App\Shared\Application\Event\LinksFoundEvent: async
+#            App\Shared\Application\Event\JobFailedEvent: async
+#            App\Shared\Application\Event\AudioDownloadedEvent: async
+#            App\Shared\Application\Event\AudioTaggedEvent: async
+#            App\Shared\Application\Event\AlbumArchivedEvent: async
+#            App\Shared\Application\Event\TrackFailedEvent: async
+
+            # --- Синхронные транспорты для прода ---
+            App\Shared\Application\Message\GetJobsMessage: sync
