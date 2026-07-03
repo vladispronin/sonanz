@@ -87,6 +87,11 @@ class Job
         return $this->author;
     }
 
+    public function getTitleType(): TitleTypeEnum
+    {
+        return $this->titleType;
+    }
+
     public function getStatus(): JobStatusEnum
     {
         return $this->status;

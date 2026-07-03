@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Api\Infrastructure\EventSubscriber;
 
 use App\Api\Infrastructure\Attribute\PublicRoute;
+use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Psr\Log\LoggerInterface;
@@ -49,22 +50,32 @@ final class ClientIdSubscriber implements EventSubscriberInterface
 
         $token = str_replace('Bearer ', '', $authHeader);
 
+        $errorCode = null;
+
         try {
             $decoded = JWT::decode($token, new Key($_ENV['JWT_SECRET'], 'HS256'));
-        } catch (Throwable $e) {
+        } catch (ExpiredException) {
+            $errorCode = 'TOKEN_EXPIRED';
+        } catch (Throwable) {
+            $errorCode = 'AUTH_FAILED';
+        }
+
+        if ($errorCode !== null) {
             $this->logger->error('Ошибка аутентификации', [
-                'error' => $e->getMessage(),
+                'code'   => $errorCode,
                 'method' => $request->getMethod(),
             ]);
 
             $event->setResponse(new JsonResponse([
                 'message' => 'Authentication failed',
-                'code' => 401,
-            ]));
+                'code'    => $errorCode,
+            ], 401));
 
             return;
         }
 
-        $request->attributes->set('clientId', Uuid::fromString($decoded->sub));
+        if (isset($decoded)) {
+            $request->attributes->set('clientId', Uuid::fromString($decoded->sub));
+        }
     }
 }

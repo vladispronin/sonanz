@@ -28,7 +28,7 @@ class TokenController
             'iss' => self::JWT_ISS,
             'iat' => time(),
             'exp' => time() + 3600,
-            'sub' => $userId
+            'sub' => $userId->toString(),
         ];
 
         $token = JWT::encode($payload, $_ENV['JWT_SECRET'], 'HS256');

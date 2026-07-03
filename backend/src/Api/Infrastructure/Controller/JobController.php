@@ -6,9 +6,12 @@ namespace App\Api\Infrastructure\Controller;
 
 use App\Shared\Application\Message\CreateJobMessage;
 use App\Api\Infrastructure\Request\CreateJobRequest;
+use App\Shared\Application\Message\DownloadFileMessage;
 use App\Shared\Application\Message\GetJobsMessage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\HandledStamp;
@@ -74,5 +77,28 @@ class JobController
             data: $jobs,
             status: 200
         );
+    }
+
+    #[Route(
+        path: '/api/v1/job/{jobId}/download',
+        name: 'api_file_download',
+        methods: ['GET']
+    )]
+    public function download(string $jobId): BinaryFileResponse
+    {
+        $envelope = $this->messageBus->dispatch(
+            new DownloadFileMessage(
+                Uuid::fromString($jobId)
+            )
+        );
+        $filePath = $envelope->last(HandledStamp::class)->getResult();
+
+        $response = new BinaryFileResponse($filePath);
+        $response->setContentDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            basename($filePath)
+        );
+
+        return $response;
     }
 }

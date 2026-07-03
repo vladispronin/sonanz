@@ -23,6 +23,7 @@
         "symfony/framework-bundle": "7.3.*",
         "symfony/http-client": "7.3.*",
         "symfony/messenger": "7.3.*",
+        "symfony/mime": "7.3.*",
         "symfony/monolog-bundle": "^4.0",
         "symfony/process": "7.3.*",
         "symfony/property-access": "7.3.*",

@@ -86,6 +86,8 @@ services:
   php:
     <<: [*app-env, *app-build]
     restart: unless-stopped
+    volumes:
+      - audio_tmp:/tmp
     depends_on:
       database:
         condition: service_healthy
