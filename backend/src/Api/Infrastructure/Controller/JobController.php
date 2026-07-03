@@ -91,12 +91,12 @@ class JobController
                 Uuid::fromString($jobId)
             )
         );
-        $filePath = $envelope->last(HandledStamp::class)->getResult();
+        $file = $envelope->last(HandledStamp::class)->getResult();
 
-        $response = new BinaryFileResponse($filePath);
+        $response = new BinaryFileResponse($file->path);
         $response->setContentDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            basename($filePath)
+            $file->mediaName
         );
 
         return $response;
