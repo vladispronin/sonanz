@@ -22,6 +22,7 @@ RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
 COPY . .
 
 RUN composer dump-autoload --optimize \
+    && touch .env \
     && APP_ENV=prod \
        DATABASE_URL="postgresql://x:x@x:5432/x?serverVersion=16" \
        RABBITMQ_DSN="amqp://x:x@x:5672/%2f" \
