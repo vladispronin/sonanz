@@ -1,12 +1,19 @@
 
 x-app-env: &app-env
-  env_file: ./backend/.env
   environment:
-    DATABASE_URL: "postgresql://${POSTGRES_USER:-sonanz}:${POSTGRES_PASSWORD:-sonanz}@database:5432/${POSTGRES_DB:-sonanz}?serverVersion=16&charset=utf8"
-    RABBITMQ_DSN: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/%2f"
-    REDIS_URL: "redis://redis:6379"
-    YT_DLP_BIN: "yt-dlp"
-    YT_DLP_DENO_BIN: "deno"
+    APP_ENV: "${APP_ENV:-prod}"
+    APP_SECRET: "${APP_SECRET}"
+    JWT_SECRET: "${JWT_SECRET}"
+    DATABASE_URL: "${DATABASE_URL}"
+    RABBITMQ_DSN: "${RABBITMQ_DSN}"
+    REDIS_URL: "${REDIS_URL:-redis://redis:6379}"
+    YOUTUBE_API_KEY: "${YOUTUBE_API_KEY:-}"
+    ACOUSTID_API_KEY: "${ACOUSTID_API_KEY:-}"
+    YT_DLP_BIN: "${YT_DLP_BIN:-yt-dlp}"
+    YT_DLP_DENO_BIN: "${YT_DLP_DENO_BIN:-deno}"
+    YT_DLP_COOKIES_FILE: "${YT_DLP_COOKIES_FILE:-}"
+    YT_DLP_PROXY: "${YT_DLP_PROXY:-}"
+    DEFAULT_URI: "${DEFAULT_URI:-http://localhost}"
 
 
 x-app-build: &app-build
@@ -18,12 +25,10 @@ services:
 ###> doctrine/doctrine-bundle ###
   database:
     image: postgres:${POSTGRES_VERSION:-16}-alpine
-    env_file:
-      - ./backend/.env
-      - ./backend/.env.local
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-sonanz}
-      POSTGRES_USER: ${POSTGRES_USER:-sonanz}
+      POSTGRES_DB: "${POSTGRES_DB:-sonanz}"
+      POSTGRES_USER: "${POSTGRES_USER:-sonanz}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     healthcheck:
       test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-sonanz}", "-U", "${POSTGRES_USER:-sonanz}"]
       timeout: 5s
