@@ -1,6 +1,10 @@
 
 x-app-env: &app-env
-  env_file: ./backend/.env
+  env_file:
+    - path: ./backend/.env
+      required: false
+    - path: ./backend/.env.local
+      required: false
   environment:
     DATABASE_URL: "postgresql://${POSTGRES_USER:-sonanz}:${POSTGRES_PASSWORD:-sonanz}@database:5432/${POSTGRES_DB:-sonanz}?serverVersion=16&charset=utf8"
     RABBITMQ_DSN: "amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/%2f"
