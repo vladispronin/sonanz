@@ -143,6 +143,7 @@ services:
     restart: unless-stopped
     volumes:
       - audio_tmp:/tmp
+      - ./yt-cookies.txt:/run/yt-cookies.txt:ro
     depends_on:
       rabbitmq:
         condition: service_healthy
