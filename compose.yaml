@@ -18,10 +18,11 @@ services:
 ###> doctrine/doctrine-bundle ###
   database:
     image: postgres:${POSTGRES_VERSION:-16}-alpine
-    env_file: ./backend/.env
+    env_file:
+      - ./backend/.env
+      - ./backend/.env.local
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-sonanz}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sonanz}
       POSTGRES_USER: ${POSTGRES_USER:-sonanz}
     healthcheck:
       test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-sonanz}", "-U", "${POSTGRES_USER:-sonanz}"]
