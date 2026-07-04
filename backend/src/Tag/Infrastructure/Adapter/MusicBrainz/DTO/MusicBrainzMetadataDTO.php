@@ -28,8 +28,10 @@ final readonly class MusicBrainzMetadataDTO
 
         return new self(
             title: $recording['title'] ?? null,
-            artist: self::getArtistsAsString($recording['artist-credit']),
-            albumArtist: self::getArtistsAsString($release['artist-credit']),
+            artist: self::getArtistsAsString($recording['artist-credit'] ?? []),
+            albumArtist: self::getArtistsAsString(
+                $release['artist-credit'] ?? $recording['artist-credit'] ?? []
+            ),
             album: $releaseGroup['title'] ?? null,
             trackNumber: isset($track['number']) ? (int) $track['number'] : null,
             releaseGroupId: $releaseGroup['id'] ?? null,

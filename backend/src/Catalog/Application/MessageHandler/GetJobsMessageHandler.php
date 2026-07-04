@@ -22,9 +22,10 @@ class GetJobsMessageHandler
 
     public function __invoke(GetJobsMessage $message): array
     {
-        $jobs = $this->jobRepository->findBy([
-            'userId' => $message->userId,
-        ]);
+        $jobs = $this->jobRepository->findBy(
+            ['userId' => $message->userId,],
+            ['createdAt' => 'ASC']
+        );
 
         return array_map(fn (Job $job) => [
             'id' => $job->getId()->toString(),

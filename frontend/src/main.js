@@ -34,19 +34,29 @@ let currentEx    = EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)]
 
 const TERMINAL = new Set(['completed', 'failed', 'cancelled'])
 
+const STATUS_RU = {
+  pending:    'в очереди',
+  processing: 'в процессе',
+  completed:  'завершено',
+  failed:     'ошибка',
+  cancelled:  'отменено',
+}
+
 const dom = {
-  appCenter:   $('app-center'),
-  author:      $('author'),
-  title:       $('title'),
-  titleLabel:  $('title-label'),
-  toggleTrack: $('toggle-track'),
-  toggleAlbum: $('toggle-album'),
-  btnMeta:     $('btn-meta'),
-  btnStart:    $('btn-start'),
-  errMsg:      $('error-msg'),
-  jobsPanel:   $('jobs-panel'),
-  jobsList:    $('jobs-list'),
-  jobsCount:   $('jobs-count'),
+  appCenter:    $('app-center'),
+  author:       $('author'),
+  title:        $('title'),
+  titleLabel:   $('title-label'),
+  toggleTrack:  $('toggle-track'),
+  toggleAlbum:  $('toggle-album'),
+  btnMeta:      $('btn-meta'),
+  btnMetaInfo:  $('btn-meta-info'),
+  metaTooltip:  $('meta-tooltip'),
+  btnStart:     $('btn-start'),
+  errMsg:       $('error-msg'),
+  jobsPanel:    $('jobs-panel'),
+  jobsList:     $('jobs-list'),
+  jobsCount:    $('jobs-count'),
 }
 
 async function fetchToken() {
@@ -94,6 +104,12 @@ function bindUI() {
   dom.btnStart.addEventListener('click', startJob)
   dom.author.addEventListener('input', () => dom.author.classList.remove('invalid'))
   dom.title.addEventListener('input',  () => dom.title.classList.remove('invalid'))
+
+  dom.btnMetaInfo.addEventListener('click', e => {
+    e.stopPropagation()
+    dom.metaTooltip.classList.toggle('visible')
+  })
+  document.addEventListener('click', () => dom.metaTooltip.classList.remove('visible'))
 }
 
 function applyPlaceholders() {
@@ -112,7 +128,7 @@ function setMode(mode) {
 function toggleMeta() {
   withMetadata = !withMetadata
   dom.btnMeta.classList.toggle('active', withMetadata)
-  dom.btnMeta.textContent = withMetadata ? '✓ META' : '+ META'
+  dom.btnMeta.querySelector('.meta-icon').textContent = withMetadata ? '✓' : '+'
 }
 
 async function startJob() {
@@ -197,6 +213,7 @@ function showDownloadBtn(id) {
     btn.disabled = true
     await downloadJob(id)
     btn.classList.add('downloaded')
+    markDownloaded(id)
     btn.disabled = false
   })
 }
@@ -245,8 +262,11 @@ function prependJobEl(id) {
     <div class="job-main">
       <div class="job-info">
         <div class="job-header">
-          <span class="job-name">${esc(job.author)} — ${esc(job.title)}</span>
-          <span class="job-badge job-badge-${job.status}">${job.status}</span>
+          <div class="job-name-group">
+            <span class="job-name">${esc(job.author)} — ${esc(job.title)}</span>
+            <span class="job-type">${job.type === 'album' ? 'альбом' : 'трек'}</span>
+          </div>
+          <span class="job-badge job-badge-${job.status}">${STATUS_RU[job.status] ?? job.status}</span>
         </div>
         <div class="job-progress-row">
           <div class="job-bar">
@@ -273,7 +293,7 @@ function updateJobEl(id) {
 
   const badge = el.querySelector('.job-badge')
   badge.className   = `job-badge job-badge-${job.status}`
-  badge.textContent = job.status
+  badge.textContent = STATUS_RU[job.status] ?? job.status
 
   const fill = el.querySelector('.job-bar-fill')
   fill.style.width = `${job.progress}%`
@@ -304,6 +324,14 @@ function saveMeta(id, meta) {
   localStorage.setItem('sonanz_jobs', JSON.stringify(stored))
 }
 
+function markDownloaded(id) {
+  const stored = JSON.parse(localStorage.getItem('sonanz_jobs') || '{}')
+  if (stored[id]) {
+    stored[id].downloaded = true
+    localStorage.setItem('sonanz_jobs', JSON.stringify(stored))
+  }
+}
+
 function loadMeta() {
   return JSON.parse(localStorage.getItem('sonanz_jobs') || '{}')
 }
@@ -327,6 +355,9 @@ async function restoreJobs() {
     if (item.status === 'completed' && item.progress === 100) {
       jobs[item.id].readyToDownload = true
       showDownloadBtn(item.id)
+      if (m.downloaded) {
+        document.getElementById(`job-${item.id}`)?.querySelector('.btn-dl')?.classList.add('downloaded')
+      }
     }
   }
 
