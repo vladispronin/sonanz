@@ -28,7 +28,7 @@ RUN composer dump-autoload --optimize \
        RABBITMQ_DSN="amqp://x:x@x:5672/%2f" \
        REDIS_URL="redis://x:6379" \
        APP_SECRET="build" \
-       php bin/console cache:warmup --env=prod
+       php bin/console cache:warmup --env=prod --no-optional-warmers
 
 FROM base AS download
 
