@@ -28,6 +28,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
+    ports:
+      - "5434:5432"
     volumes:
       - database_data:/var/lib/postgresql/data:rw
 ###< doctrine/doctrine-bundle ###
