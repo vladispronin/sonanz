@@ -1,17 +1,22 @@
+### Создать token
+POST http://localhost:8000/api/v1/token
+Content-Type: application/json
+
+### Получить jobs
+GET http://localhost:8000/api/v1/job
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzb25hbnoiLCJpYXQiOjE3ODI3NTg3MDMsImV4cCI6MTc4Mjc2MjMwMywic3ViIjoiMDE5ZjE0YjMtMDI4Yy03NmQzLWJkZmQtMWM2NWMxZjc5MzNlIn0.eUu6sr86I2sU2n7ABz5-mq9tISipUXon9l1PWp5FhbM
+
 ### Создать job (track)
 POST http://localhost:8000/api/v1/job
 Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzb25hbnoiLCJpYXQiOjE3ODI3NTg3MDMsImV4cCI6MTc4Mjc2MjMwMywic3ViIjoiMDE5ZjE0YjMtMDI4Yy03NmQzLWJkZmQtMWM2NWMxZjc5MzNlIn0.eUu6sr86I2sU2n7ABz5-mq9tISipUXon9l1PWp5FhbM
 
 {"author": "Pink Floyd", "title": "Wish You Were Here", "titleType": "track", "withMetadata": false}
 
-### Создать job (short album)
+### Создать job (album)
 POST http://localhost:8000/api/v1/job
 Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzb25hbnoiLCJpYXQiOjE3ODI3NTg3MDMsImV4cCI6MTc4Mjc2MjMwMywic3ViIjoiMDE5ZjE0YjMtMDI4Yy03NmQzLWJkZmQtMWM2NWMxZjc5MzNlIn0.eUu6sr86I2sU2n7ABz5-mq9tISipUXon9l1PWp5FhbM
 
 {"author": "ruby my dear", "title": "maigre", "titleType": "album", "withMetadata": true}
-
-### Создать job (full album)
-POST http://localhost:8000/api/v1/job
-Content-Type: application/json
-
-{"author": "lost horizon", "title": "awakening the world", "titleType": "album", "withMetadata": false}

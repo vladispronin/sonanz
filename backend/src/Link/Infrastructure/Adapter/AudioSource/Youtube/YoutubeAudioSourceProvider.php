@@ -7,6 +7,7 @@ namespace App\Link\Infrastructure\Adapter\AudioSource\Youtube;
 use App\Link\Domain\Port\AudioSourceProviderInterface;
 use App\Link\Domain\ValueObject\AudioSearchQuery;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\PlaylistResult\ApiPlaylistResultDTO;
+use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\PlaylistResult\PlaylistItemDTO;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\SearchResult\ApiSearchResultDTO;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\DTO\SearchResult\SearchResultItemDTO;
 use App\Link\Infrastructure\Adapter\AudioSource\Youtube\Enum\SearchObjectTypeEnum;
@@ -64,6 +65,20 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
 
         $searchResultDTO = ApiSearchResultDTO::fromArray($searchData);
 
+        $this->logger->info('YouTube search вернул кандидатов', [
+            'search_string' => $this->buildSearchString($query),
+            'candidates_count' => count($searchResultDTO->items),
+            'candidates' => array_map(
+                static fn (SearchResultItemDTO $item): array => [
+                    'title' => $item->snippet->title,
+                    'channel_title' => $item->snippet->channelTitle,
+                    'video_id' => $item->id->videoId,
+                    'playlist_id' => $item->id->playlistId,
+                ],
+                $searchResultDTO->items,
+            ),
+        ]);
+
         $bestItem = $this->pickBestItem($searchResultDTO->items, $query);
 
         if ($bestItem === null) {
@@ -99,6 +114,18 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
 
         $playlistResultDTO = ApiPlaylistResultDTO::fromArray($playlistData);
 
+        $this->logger->info('YouTube playlistItems вернул треки', [
+            'playlist_id' => $bestItem->id->playlistId,
+            'items_count' => count($playlistResultDTO->getPlaylistItems()),
+            'items' => array_map(
+                static fn (PlaylistItemDTO $item): array => [
+                    'title' => $item->getTitle(),
+                    'video_id' => $item->getVideoId(),
+                ],
+                $playlistResultDTO->getPlaylistItems(),
+            ),
+        ]);
+
         foreach ($playlistResultDTO->getPlaylistItems() as $playlistItem) {
             $linksList[] = new AudioSourceLink(
                 self::VIDEO_LINK_PREFIX . $playlistItem->getVideoId(),
@@ -117,6 +144,7 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
         $titleQuery = $query->author . ' ' . $query->title;
         $bestScore = 0.0;
         $bestItem = null;
+        $scoredItems = [];
 
         foreach ($items as $item) {
             $score = $this->relevanceScorer->score($titleQuery, $item->snippet->title);
@@ -134,6 +162,8 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
                 $score = 1.0;
             }
 
+            $scoredItems[] = ['title' => $item->snippet->title, 'score' => $score];
+
             if ($score > $bestScore) {
                 $bestScore = $score;
                 $bestItem = $item;
@@ -145,8 +175,21 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
         }
 
         if ($bestScore < self::RELEVANCE_THRESHOLD) {
+            $this->logger->warning('Ни один кандидат YouTube не прошёл порог релевантности', [
+                'query_author' => $query->author,
+                'query_title' => $query->title,
+                'best_score' => $bestScore,
+                'threshold' => self::RELEVANCE_THRESHOLD,
+                'scored_candidates' => $scoredItems,
+            ]);
+
             return null;
         }
+
+        $this->logger->info('Выбран кандидат YouTube', [
+            'best_title' => $bestItem->snippet->title,
+            'best_score' => $bestScore,
+        ]);
 
         return $bestItem;
     }
@@ -180,8 +223,16 @@ class YoutubeAudioSourceProvider implements AudioSourceProviderInterface
             );
 
             $content = $result->getContent();
+            $data = json_decode($content, true);
 
-            return json_decode($content, true);
+            if ($data === null && $content !== '') {
+                $this->logger->warning('YouTube API вернул нераспознанный ответ', [
+                    'url' => $url,
+                    'body' => mb_substr($content, 0, 500),
+                ]);
+            }
+
+            return $data;
         } catch (Throwable $e) {
             $this->logger->error('Ошибка запроса к YouTube API: ' . $e->getMessage(), [
                 'url' => $url,

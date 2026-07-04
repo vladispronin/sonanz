@@ -4,12 +4,18 @@ declare(strict_types=1);
 
 namespace App\Api\Infrastructure\EventSubscriber;
 
+use App\Api\Infrastructure\Attribute\PublicRoute;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Psr\Log\LoggerInterface;
+use ReflectionMethod;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Uid\Uuid;
+use Throwable;
 
 final class ClientIdSubscriber implements EventSubscriberInterface
 {
@@ -23,32 +29,53 @@ final class ClientIdSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST  => ['onRequest', 256],
+            KernelEvents::REQUEST  => ['onRequest', 8],
         ];
     }
 
     public function onRequest(RequestEvent $event): void
     {
-        if (!$event->isMainRequest()) {
-            return;
-        }
-
         $request = $event->getRequest();
 
-        $clientId = $request->headers->get('X-Client-ID');
+        $controller = $request->attributes->get('_controller');
+        if (is_string($controller) && str_contains($controller, '::')) {
+            [$class, $method] = explode('::', $controller);
+            $reflection = new ReflectionMethod($class, $method);
+            if (!empty($reflection->getAttributes(PublicRoute::class))) {
+                return;
+            }
+        }
 
-        if (empty($clientId)) {
+        $authHeader = $request->headers->get('Authorization');
+
+        $token = str_replace('Bearer ', '', $authHeader);
+
+        $errorCode = null;
+
+        try {
+            $decoded = JWT::decode($token, new Key($_ENV['JWT_SECRET'], 'HS256'));
+        } catch (ExpiredException) {
+            $errorCode = 'TOKEN_EXPIRED';
+        } catch (Throwable) {
+            $errorCode = 'AUTH_FAILED';
+        }
+
+        if ($errorCode !== null) {
             $this->logger->error('Ошибка аутентификации', [
-                'method'    => $request->getMethod(),
-                'client_id' => $clientId
+                'code'   => $errorCode,
+                'method' => $request->getMethod(),
             ]);
 
             $event->setResponse(new JsonResponse([
                 'message' => 'Authentication failed',
-                'code' => 401,
-            ]));
+                'code'    => $errorCode,
+            ], 401));
+
+            return;
         }
 
-        $request->attributes->set('clientId', Uuid::fromString($clientId));
+        if (isset($decoded)) {
+            $request->attributes->set('clientId', Uuid::fromString($decoded->sub));
+        }
     }
 }
