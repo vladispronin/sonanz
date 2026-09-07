@@ -127,7 +127,10 @@ services:
         condition: service_healthy
 
   worker-link:
-    <<: [*app-env, *app-build]
+    <<: *app-env
+    build:
+      context: ./backend
+      target: download
     command: supervisord -n -c /app/docker/supervisor/links.conf
     restart: unless-stopped
     depends_on:
