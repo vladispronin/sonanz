@@ -30,8 +30,10 @@ final readonly class AcoustIdMetadataDTO
 
         return new self(
             title: $recording['title'] ?? null,
-            artist: self::getArtistsAsString($recording['artists']) ?? null,
-            albumArtist: self::getArtistsAsString($releaseGroup['artists']) ?? null,
+            artist: array_key_exists('artists', $recording) && !is_null($recording['artists']) ?
+                self::getArtistsAsString($recording['artists']) : null,
+            albumArtist: array_key_exists('artists', $releaseGroup) && !is_null($releaseGroup['artists']) ?
+                self::getArtistsAsString($releaseGroup['artists']) : null,
             album: $releaseGroup['title'] ?? null,
             trackNumber: isset($track['position']) ? (int) $track['position'] : null,
             releaseGroupId: $releaseGroup['id'] ?? null,
@@ -45,12 +47,21 @@ final readonly class AcoustIdMetadataDTO
 
         foreach ($artists as $artist) {
             if (isset($artist['joinphrase'])) {
-                $result .= $artist['name'] . $artist['joinphrase'];
+                $result .= self::extractArtistName($artist) . $artist['joinphrase'];
             } else {
-                $result .= $artist['name'];
+                $result .= self::extractArtistName($artist);
             }
         }
 
         return $result;
+    }
+
+    private static function extractArtistName(mixed $artist): string
+    {
+        if (is_array($artist)) {
+            return $artist['name'];
+        } else {
+            return $artist;
+        }
     }
 }
