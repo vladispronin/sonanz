@@ -109,7 +109,9 @@ class Job
 
     public function enrichWithMetadataAuthor(string $author): void
     {
-        $this->metadataAuthor = $author;
+        if (is_null($this->metadataAuthor)) {
+            $this->metadataAuthor = $author;
+        }
     }
 
     public function getActualAuthor(): string
