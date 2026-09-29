@@ -142,7 +142,6 @@ services:
     build:
       context: ./backend
       target: download
-    network_mode: host
     command: supervisord -n -c /app/docker/supervisor/downloads.conf
     restart: unless-stopped
     volumes:
