@@ -67,7 +67,7 @@ class AudioTaggedEventHandler
             $this->albumRepository->updateTitle($album->getId(), $event->metadata->albumTitle);
         }
 
-        if ($event->metadata?->artist !== null) {
+        if ($event->metadata?->albumArtist !== null) {
             $this->jobRepository->enrichWithMetadataAuthor($jobId, $event->metadata->albumArtist);
         }
 
