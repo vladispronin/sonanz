@@ -22,8 +22,17 @@ class YtDlpAudioDownloadProvider implements AudioDownloadProviderInterface
         $process->run();
 
         if (!$process->isSuccessful()) {
-            $process = $this->buildProcess($query, withCookies: true);
-            $process->run();
+            // yt-dlp при выходе перезаписывает файл cookies, а исходный смонтирован read-only,
+            // поэтому работаем с временной копией
+            $cookiesCopy = $this->copyCookies($query);
+            try {
+                $process = $this->buildProcess($query, withCookies: true, cookiesFile: $cookiesCopy);
+                $process->run();
+            } finally {
+                if ($cookiesCopy !== null) {
+                    @unlink($cookiesCopy);
+                }
+            }
         }
 
         if (!$process->isSuccessful()) {
@@ -31,7 +40,21 @@ class YtDlpAudioDownloadProvider implements AudioDownloadProviderInterface
         }
     }
 
-    private function buildProcess(AudioDownloadQuery $query, bool $withCookies): Process
+    private function copyCookies(AudioDownloadQuery $query): ?string
+    {
+        if ($this->cookiesFile === '' || !is_readable($this->cookiesFile)) {
+            return null;
+        }
+
+        $copy = sys_get_temp_dir() . '/yt-cookies-' . $query->trackId->toString() . '.txt';
+        if (!@copy($this->cookiesFile, $copy)) {
+            return null;
+        }
+
+        return $copy;
+    }
+
+    private function buildProcess(AudioDownloadQuery $query, bool $withCookies, ?string $cookiesFile = null): Process
     {
         $cmd = [$this->ytDlpBin];
 
@@ -46,9 +69,9 @@ class YtDlpAudioDownloadProvider implements AudioDownloadProviderInterface
             $cmd[] = 'deno:' . $this->denoBin;
         }
 
-        if ($withCookies && $this->cookiesFile !== '') {
+        if ($withCookies && $cookiesFile !== null) {
             $cmd[] = '--cookies';
-            $cmd[] = $this->cookiesFile;
+            $cmd[] = $cookiesFile;
         }
 
         $process = new Process(array_merge($cmd, [
